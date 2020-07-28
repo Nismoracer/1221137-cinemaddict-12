@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Илья Грунов](https://up.htmlacademy.ru/ecmascript/12/user/1221137).
-* Наставник: `Неизвестно`.
+* Наставник: [Артём Мязитов](https://htmlacademy.ru/profile/axema).
 
 ---
 
