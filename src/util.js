@@ -9,7 +9,7 @@ export const getRandomInteger = (a = 0, b = 1) => {
 
 export const generateRandomArray = (initialStrings = [], maxElements = 0) => {
   const movies = new Array(getRandomInteger(1, maxElements))
-    .fill().map(function () {
+    .fill().map(() => {
       const randomIndex = getRandomInteger(0, initialStrings.length - 1);
       return initialStrings[randomIndex];
     });
@@ -38,7 +38,7 @@ export const generateName = () => {
   return NAMES[randomIndex];
 };
 
-export const defineUserStatus = (numberWatched) => {
+export const getUserStatus = (numberWatched) => {
   if (numberWatched > 0 && numberWatched <= 10) {
     return `novice`;
   } else if (numberWatched > 10 && numberWatched <= 20) {

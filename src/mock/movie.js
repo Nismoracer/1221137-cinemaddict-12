@@ -13,10 +13,9 @@ const generateRating = () => {
 };
 
 const generateDate = () => {
+  const maxDaysGap = 3650;
   const createDate = new Date();
   createDate.setHours(0, 0, 0, 0);
-
-  const maxDaysGap = 3650;
   const daysGap = getRandomInteger(0, maxDaysGap);
   createDate.setDate(createDate.getDate() - daysGap);
   return new Date(createDate);
@@ -25,11 +24,11 @@ const generateDate = () => {
 export const generateMovie = () => {
   const postersPath = `./images/posters/`;
   const MAX_STRINGS = 3;
-  const createDate = generateDate();
   const minDuration = 100;
   const maxDuration = 200;
   const minAge = 3;
   const maxAge = 18;
+  const createDate = generateDate();
   const duration = getRandomInteger(minDuration, maxDuration);
   const title = generateTitle();
 
@@ -53,4 +52,3 @@ export const generateMovie = () => {
     isHistory: Boolean(getRandomInteger(0, 1)),
   };
 };
-
