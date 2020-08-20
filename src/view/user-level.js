@@ -1,6 +1,6 @@
-import {getUserStatus} from "../util.js";
+import {getUserStatus, createElement} from "../util.js";
 
-export const createUserLevelTemplate = (userInfo) => {
+const createUserLevelTemplate = (userInfo) => {
   return (
     `<section class="header__profile profile">
       <p class="profile__rating">${getUserStatus(userInfo)}</p>
@@ -8,3 +8,26 @@ export const createUserLevelTemplate = (userInfo) => {
     </section>`
   );
 };
+
+export default class User {
+  constructor(userInfo) {
+    this._element = null;
+    this._userInfo = userInfo;
+  }
+
+  getTemplate() {
+    return createUserLevelTemplate(this._userInfo);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
