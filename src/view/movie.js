@@ -1,6 +1,6 @@
-import {humanizeDuration} from "../util.js";
+import {humanizeDuration, createElement} from "../util.js";
 
-export const createMovieTemplate = (movie) => {
+const createMovieTemplate = (movie) => {
   const {poster, title, rating, createDate, duration, genres, description, comments} = movie;
   const hrsMins = humanizeDuration(duration);
   const year = createDate.getFullYear();
@@ -24,3 +24,26 @@ export const createMovieTemplate = (movie) => {
     </article>`
   );
 };
+
+export default class Movie {
+  constructor(movie) {
+    this._element = null;
+    this._movie = movie;
+  }
+
+  getTemplate() {
+    return createMovieTemplate(this._movie);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

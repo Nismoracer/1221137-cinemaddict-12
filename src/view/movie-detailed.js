@@ -1,4 +1,4 @@
-import {humanizeDuration, humanizeReleaseDate} from "../util.js";
+import {humanizeDuration, humanizeReleaseDate, createElement} from "../util.js";
 
 const createGenresString = (genres) => {
   let sumString = genres.length > 1 ?
@@ -39,7 +39,7 @@ export const createFilmDetailsTemplate = (movie) => {
   const runTime = humanizeDuration(duration);
   const releaseDate = humanizeReleaseDate(createDate);
   return (
-    `<section class="film-details visually-hidden">
+    `<section class="film-details">
       <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
           <div class="film-details__close">
@@ -155,3 +155,26 @@ export const createFilmDetailsTemplate = (movie) => {
     </section>`
   );
 };
+
+export default class MovieDetailed {
+  constructor(movie) {
+    this._element = null;
+    this._movie = movie;
+  }
+
+  getTemplate() {
+    return createFilmDetailsTemplate(this._movie);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
