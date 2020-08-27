@@ -1,29 +1,14 @@
-import {createElement} from "../util.js";
+import AbstractView from "./abstract.js";
 
-export const createBoardWrapperTemplate = () => {
+const createBoardWrapperTemplate = () => {
   return (
     `<section class="films"></section>`
   );
 };
 
-export default class BoardWrapper {
-  constructor() {
-    this._element = null;
-  }
+export default class BoardWrapper extends AbstractView {
 
   getTemplate() {
     return createBoardWrapperTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

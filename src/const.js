@@ -1,5 +1,11 @@
 export const GENRES = [`Drama`, `Triller`, `Comedy`, `Cartoon`, `Musicle`];
 
+export const SortType = {
+  DEFAULT: `default`,
+  BY_DATE: `by-date`,
+  BY_RATING: `by-rating`
+};
+
 export const TITLES = [
   `Страх и ненависть в Лас-Вегасе`,
   `Зеленый слоник`,

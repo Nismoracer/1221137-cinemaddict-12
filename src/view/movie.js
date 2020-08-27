@@ -1,4 +1,5 @@
-import {humanizeDuration, createElement} from "../util.js";
+import {humanizeDuration} from "../utils/movie.js";
+import AbstractView from "./abstract.js";
 
 const createMovieTemplate = (movie) => {
   const {poster, title, rating, createDate, duration, genres, description, comments} = movie;
@@ -25,25 +26,24 @@ const createMovieTemplate = (movie) => {
   );
 };
 
-export default class Movie {
+export default class Movie extends AbstractView {
   constructor(movie) {
-    this._element = null;
+    super();
     this._movie = movie;
+    this._openDetailedHandler = this._openDetailedHandler.bind(this);
+  }
+
+  _openDetailedHandler(evt) {
+    evt.preventDefault();
+    this._callback.openClick();
+  }
+
+  setOpenDetailedHandler(callback) {
+    this._callback.openClick = callback;
+    this.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, this._openDetailedHandler);
   }
 
   getTemplate() {
     return createMovieTemplate(this._movie);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
