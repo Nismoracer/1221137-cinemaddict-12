@@ -1,4 +1,5 @@
-import {humanizeDuration, humanizeReleaseDate, createElement} from "../util.js";
+import {humanizeDuration, humanizeReleaseDate} from "../utils/movie.js";
+import AbstractView from "./abstract.js";
 
 const createGenresString = (genres) => {
   let sumString = genres.length > 1 ?
@@ -33,7 +34,7 @@ const createCommentsString = (comments) => {
   return commentsString;
 };
 
-export const createFilmDetailsTemplate = (movie) => {
+const createFilmDetailsTemplate = (movie) => {
   const {poster, title, rating, createDate, duration, genres, description, comments, altTitle,
     director, writers, actors, country, restriction} = movie;
   const runTime = humanizeDuration(duration);
@@ -156,25 +157,24 @@ export const createFilmDetailsTemplate = (movie) => {
   );
 };
 
-export default class MovieDetailed {
+export default class MovieDetailed extends AbstractView {
   constructor(movie) {
-    this._element = null;
+    super();
     this._movie = movie;
+    this._closeDetailedHandler = this._closeDetailedHandler.bind(this);
+  }
+
+  _closeDetailedHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeClick();
+  }
+
+  setCloseDetailedHandler(callback) {
+    this._callback.closeClick = callback;
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
   }
 
   getTemplate() {
     return createFilmDetailsTemplate(this._movie);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

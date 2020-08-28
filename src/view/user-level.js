@@ -1,4 +1,5 @@
-import {getUserStatus, createElement} from "../util.js";
+import {getUserStatus} from "../utils/movie.js";
+import AbstractView from "./abstract.js";
 
 const createUserLevelTemplate = (userInfo) => {
   return (
@@ -9,25 +10,13 @@ const createUserLevelTemplate = (userInfo) => {
   );
 };
 
-export default class User {
+export default class User extends AbstractView {
   constructor(userInfo) {
-    this._element = null;
+    super();
     this._userInfo = userInfo;
   }
 
   getTemplate() {
     return createUserLevelTemplate(this._userInfo);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

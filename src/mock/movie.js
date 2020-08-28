@@ -1,4 +1,4 @@
-import {getRandomInteger, generateRandomArray, generateFilePath, generateName} from "../util.js";
+import {getRandomInteger, generateRandomArray, generateFilePath, generateName} from "../utils/common.js";
 import {GENRES, POSTERS, TEST_STRINGS, NAMES, COUNTRIES, TITLES} from "../const.js";
 import {generateComments} from "./comments.js";
 

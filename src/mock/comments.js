@@ -1,5 +1,5 @@
 import {TEST_STRINGS, EMOJES} from "../const.js";
-import {getRandomInteger, generateFilePath, generateRandomArray, generateName} from "../util.js";
+import {getRandomInteger, generateFilePath, generateRandomArray, generateName} from "../utils/common.js";
 
 const generateDate = () => {
   const maxDaysGap = 3;
