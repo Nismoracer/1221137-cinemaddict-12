@@ -1,7 +1,7 @@
 import AbstractView from "./abstract.js";
 
 const createMenuTemplate = (filters) => {
-  const history = filters.filter((filter) => filter.name === `history`).map((filter) => filter.count);
+  const history = filters.filter((filter) => filter.name === `watched`).map((filter) => filter.count);
   const favorites = filters.filter((filter) => filter.name === `favorite`).map((filter) => filter.count);
   const watchlist = filters.filter((filter) => filter.name === `watchlist`).map((filter) => filter.count);
   return (

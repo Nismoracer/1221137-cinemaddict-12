@@ -14,7 +14,7 @@ const changeActiveElement = (evt) => {
   sortButtons.forEach((element) => {
     element.classList.remove(`sort__button--active`);
   });
-  evt.classList.add(`sort__button--active`);
+  evt.classList.add(`sort__button--activen`);
 };
 
 export default class Sort extends AbstractView {

@@ -1,13 +1,16 @@
+import moment from "moment";
+
 export const humanizeDuration = (duration) => {
   const hours = duration / 60;
   return Math.floor(hours) + `h ` + Math.floor(duration % 60) + `m`;
 };
 
 export const humanizeReleaseDate = (createDate) => {
-  const releaseDate = createDate.toLocaleString(`en-US`, {day: `numeric`, month: `long`, year: `numeric`}).replace(/,/g, ``);
-  const temporaryStrings = releaseDate.split(` `);
-  [temporaryStrings[0], temporaryStrings [1]] = [temporaryStrings[1], temporaryStrings [0]];
-  return temporaryStrings.join(` `);
+  return moment(createDate).format(`D MMMM YYYY`);
+};
+
+export const humanizeCommentDate = (commentDate) => {
+  return moment(commentDate).startOf(`hour`).fromNow();
 };
 
 export const getUserStatus = (numberWatched) => {
@@ -22,9 +25,9 @@ export const getUserStatus = (numberWatched) => {
 };
 
 export const sortByDate = (a, b) => {
-  return a.createDate.getTime() - b.createDate.getTime();
+  return b.createDate.getTime() - a.createDate.getTime();
 };
 
 export const sortByRating = (a, b) => {
-  return parseInt((a.rating.replace(`.`, ``)), 10) - parseInt((b.rating.replace(`.`, ``)), 10);
+  return parseInt((b.rating.replace(`.`, ``)), 10) - parseInt((a.rating.replace(`.`, ``)), 10);
 };

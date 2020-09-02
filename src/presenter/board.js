@@ -3,21 +3,22 @@ import BoardWrapperView from "../view/board-wrapper";
 import BoardView from "../view/board.js";
 import MoviesListView from "../view/movies-list.js";
 import EmptyListView from "../view/no-movies.js";
-import MovieView from "../view/movie.js";
-import MovieDetailedView from "../view/movie-detailed.js";
 import LoadMoreView from "../view/load-more.js";
+import MoviePresenter from "./movie.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
+import {updateItem} from "../utils/common.js";
 import {SortType} from "../const.js";
 import {sortByDate, sortByRating} from "../utils/movie.js";
 
 const MOVIES_COUNT_PER_STEP = 5;
 
 export default class Board {
-  constructor(boardContainer) {
+  constructor(boardContainer, body) {
     this._boardContainer = boardContainer;
     this._renderedMovies = MOVIES_COUNT_PER_STEP;
-    this._openedPopup = null;
     this._currentSortType = SortType.DEFAULT;
+    this._moviePresenter = {};
+    this._body = body;
 
     this._sortComponent = new SortView();
     this._boardWrapperComponent = new BoardWrapperView();
@@ -25,8 +26,10 @@ export default class Board {
     this._moviesListComponent = new MoviesListView();
     this._emptyListComponent = new EmptyListView();
     this._loadMoreComponent = new LoadMoreView();
+    this._handleMovieChange = this._handleMovieChange.bind(this);
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(movies) {
@@ -66,44 +69,29 @@ export default class Board {
     this._currentSortType = sortType;
   }
 
+  _handleMovieChange(updatedMovie) {
+    this._movies = updateItem(this._movies, updatedMovie);
+    this._defaultMovies = updateItem(this._defaultMovies, updatedMovie);
+    this._moviePresenter[updatedMovie.id].init(updatedMovie);
+  }
+
+  _handleModeChange() {
+    Object
+      .values(this._moviePresenter)
+      .forEach((presenter) => presenter.resetView());
+  }
+
   _renderMovie(movie) {
-    const movieComponent = new MovieView(movie);
-    const movieDetailedComponent = new MovieDetailedView(movie);
-
-    const showDetailedMovie = () => {
-      if (this._openedPopup) {
-        remove(this._openedPopup);
-        this._openedPopup = null;
-      }
-      render(this._boardContainer, movieDetailedComponent, RenderPosition.BEFOREEND);
-      document.addEventListener(`keydown`, onEscKeyDown);
-      movieDetailedComponent.setCloseDetailedHandler(() => {
-        hideDetailedMovie();
-      });
-      this._openedPopup = movieDetailedComponent;
-    };
-
-    const hideDetailedMovie = () => {
-      document.removeEventListener(`keydown`, onEscKeyDown);
-      remove(movieDetailedComponent);
-    };
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        evt.preventDefault();
-        hideDetailedMovie();
-      }
-    };
-
-    movieComponent.setOpenDetailedHandler(() => {
-      showDetailedMovie();
-    });
-
-    render(this._moviesListComponent, movieComponent, RenderPosition.BEFOREEND);
+    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._boardContainer, this._handleMovieChange, this._body, this._handleModeChange);
+    MoviePresent.init(movie);
+    this._moviePresenter[movie.id] = MoviePresent;
   }
 
   _clearMoviesList() {
-    this._moviesListComponent.getElement().innerHTML = ``;
+    Object
+    .values(this._moviePresenter)
+    .forEach((movie) => movie.destroy());
+    this._moviePresenter = {};
     this._renderedMovies = MOVIES_COUNT_PER_STEP;
   }
 

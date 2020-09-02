@@ -16,12 +16,26 @@ export const generateRandomArray = (initialStrings = [], maxElements = 0) => {
   return movies;
 };
 
+export const generateName = () => {
+  const randomIndex = getRandomInteger(0, NAMES.length - 1);
+  return NAMES[randomIndex];
+};
+
 export const generateFilePath = (filePath = [], inputStrings) => {
   const randomIndex = getRandomInteger(0, inputStrings.length - 1);
   return filePath + inputStrings[randomIndex];
 };
 
-export const generateName = () => {
-  const randomIndex = getRandomInteger(0, NAMES.length - 1);
-  return NAMES[randomIndex];
+export const updateItem = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1)
+  ];
 };

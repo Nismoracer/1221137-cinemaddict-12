@@ -2,6 +2,8 @@ import {getRandomInteger, generateRandomArray, generateFilePath, generateName} f
 import {GENRES, POSTERS, TEST_STRINGS, NAMES, COUNTRIES, TITLES} from "../const.js";
 import {generateComments} from "./comments.js";
 
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
 const generateTitle = () => {
   const randomIndex = getRandomInteger(0, TITLES.length - 1);
   return TITLES[randomIndex];
@@ -21,6 +23,17 @@ const generateDate = () => {
   return new Date(createDate);
 };
 
+const getUserInfo = () => {
+  const alreadyWatched = Boolean(getRandomInteger(0, 1));
+  const watchingDate = (alreadyWatched) ? generateDate() : null;
+  return {
+    watchlist: Boolean(getRandomInteger(0, 1)),
+    favorite: Boolean(getRandomInteger(0, 1)),
+    alreadyWatched,
+    watchingDate
+  };
+};
+
 export const generateMovie = () => {
   const postersPath = `./images/posters/`;
   const MAX_STRINGS = 3;
@@ -33,6 +46,7 @@ export const generateMovie = () => {
   const title = generateTitle();
 
   return {
+    id: generateId(),
     poster: generateFilePath(postersPath, POSTERS),
     title,
     rating: generateRating(),
@@ -47,8 +61,6 @@ export const generateMovie = () => {
     actors: Array.from(new Set(generateRandomArray(NAMES, MAX_STRINGS))).join(`, `),
     country: Array.from(new Set(generateRandomArray(COUNTRIES, MAX_STRINGS))).join(`, `),
     restriction: getRandomInteger(minAge, maxAge),
-    isWatchlist: Boolean(getRandomInteger(0, 1)),
-    isFavorite: Boolean(getRandomInteger(0, 1)),
-    isHistory: Boolean(getRandomInteger(0, 1)),
+    userDetails: getUserInfo()
   };
 };

@@ -1,5 +1,8 @@
-import {humanizeDuration, humanizeReleaseDate} from "../utils/movie.js";
-import AbstractView from "./abstract.js";
+import {humanizeDuration, humanizeReleaseDate, humanizeCommentDate} from "../utils/movie.js";
+import {createElement} from "../utils/render.js";
+import Smart from "./smart.js";
+
+const filePathEmojes = `./images/emoji/`;
 
 const createGenresString = (genres) => {
   let sumString = genres.length > 1 ?
@@ -12,6 +15,17 @@ const createGenresString = (genres) => {
   sumString += `</td>`;
   return sumString;
 };
+const getEmojiIcon = (inputString = `smile`) => {
+  return filePathEmojes + inputString + `.png`;
+};
+
+const getEmojiTemplate = (smile) => {
+  return (
+    `<div for="add-emoji" class="film-details__add-emoji-label">
+      <img src="${getEmojiIcon(smile)}" width="55" height="55" alt="emoji-smile">
+    </div>`
+  );
+};
 
 const createCommentsString = (comments) => {
   let commentsString = ``;
@@ -19,13 +33,13 @@ const createCommentsString = (comments) => {
     commentsString +=
     `<li class="film-details__comment">
       <span class="film-details__comment-emoji">
-        <img src="${comment.emoji}" width="55" height="55" alt="emoji-smile">
+        <img src="${getEmojiIcon(comment.emotion)}" width="55" height="55" alt="emoji-smile">
       </span>
       <div>
-        <p class="film-details__comment-text">${comment.text}</p>
+        <p class="film-details__comment-text">${comment.comment}</p>
         <p class="film-details__comment-info">
-          <span class="film-details__comment-author">${comment.name}</span>
-          <span class="film-details__comment-day">2019/12/31 23:59</span>
+          <span class="film-details__comment-author">${comment.author}</span>
+          <span class="film-details__comment-day">${humanizeCommentDate(comment.date)}</span>
           <button class="film-details__comment-delete">Delete</button>
         </p>
       </div>
@@ -36,7 +50,7 @@ const createCommentsString = (comments) => {
 
 const createFilmDetailsTemplate = (movie) => {
   const {poster, title, rating, createDate, duration, genres, description, comments, altTitle,
-    director, writers, actors, country, restriction} = movie;
+    director, writers, actors, country, restriction, userDetails} = movie;
   const runTime = humanizeDuration(duration);
   const releaseDate = humanizeReleaseDate(createDate);
   return (
@@ -102,13 +116,13 @@ const createFilmDetailsTemplate = (movie) => {
           </div>
 
           <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${userDetails.watchlist ? `checked` : ``}>
             <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched"  ${userDetails.alreadyWatched ? `checked` : ``}>
             <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite"  ${userDetails.favorite ? `checked` : ``}>
             <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
         </div>
@@ -157,11 +171,16 @@ const createFilmDetailsTemplate = (movie) => {
   );
 };
 
-export default class MovieDetailed extends AbstractView {
+export default class MovieDetailed extends Smart {
   constructor(movie) {
     super();
     this._movie = movie;
+    this._data = Object.assign({}, movie);
+    this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
+    this._watchedClickHandler = this._watchedClickHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._closeDetailedHandler = this._closeDetailedHandler.bind(this);
+    this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
   }
 
   _closeDetailedHandler(evt) {
@@ -172,6 +191,65 @@ export default class MovieDetailed extends AbstractView {
   setCloseDetailedHandler(callback) {
     this._callback.closeClick = callback;
     this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
+  }
+
+  _watchlistClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistClick();
+  }
+
+  _watchedClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedClick();
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoritesClick();
+  }
+
+  setWatchlistClickHandler(callback) {
+    this._callback.watchlistClick = callback;
+    this.getElement().querySelector(`#watchlist`).addEventListener(`change`, this._watchlistClickHandler);
+  }
+
+  setWatchedClickHandler(callback) {
+    this._callback.watchedClick = callback;
+    this.getElement().querySelector(`#watched`).addEventListener(`change`, this._watchedClickHandler);
+  }
+
+  setFavoritesClickHandler(callback) {
+    this._callback.favoritesClick = callback;
+    this.getElement().querySelector(`#favorite`).addEventListener(`change`, this._favoriteClickHandler);
+  }
+
+  _changeEmojiLogo(smile) {
+    const currentElement = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    const parentElement = currentElement.parentElement;
+    const newElement = createElement(getEmojiTemplate(smile));
+    parentElement.replaceChild(newElement, currentElement);
+  }
+
+  _emojiChangeHandler(evt) {
+    evt.preventDefault();
+    switch (evt.target.id) {
+      case `emoji-smile`:
+        this._changeEmojiLogo(`smile`);
+        break;
+      case `emoji-sleeping`:
+        this._changeEmojiLogo(`sleeping`);
+        break;
+      case `emoji-puke`:
+        this._changeEmojiLogo(`puke`);
+        break;
+      case `emoji-angry`:
+        this._changeEmojiLogo(`angry`);
+        break;
+    }
+  }
+
+  setEmojiChangeHandler() {
+    this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, this._emojiChangeHandler);
   }
 
   getTemplate() {
