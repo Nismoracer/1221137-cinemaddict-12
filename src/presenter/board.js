@@ -13,12 +13,11 @@ import {sortByDate, sortByRating} from "../utils/movie.js";
 const MOVIES_COUNT_PER_STEP = 5;
 
 export default class Board {
-  constructor(boardContainer, body) {
+  constructor(boardContainer) {
     this._boardContainer = boardContainer;
     this._renderedMovies = MOVIES_COUNT_PER_STEP;
     this._currentSortType = SortType.DEFAULT;
     this._moviePresenter = {};
-    this._body = body;
 
     this._sortComponent = new SortView();
     this._boardWrapperComponent = new BoardWrapperView();
@@ -82,7 +81,7 @@ export default class Board {
   }
 
   _renderMovie(movie) {
-    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._boardContainer, this._handleMovieChange, this._body, this._handleModeChange);
+    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleMovieChange, this._handleModeChange);
     MoviePresent.init(movie);
     this._moviePresenter[movie.id] = MoviePresent;
   }

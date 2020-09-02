@@ -8,11 +8,9 @@ const Mode = {
 };
 
 export default class Movie {
-  constructor(moviesListContainer, boardContainer, changeData, body, changeMode) {
+  constructor(moviesListContainer, changeData, changeMode) {
     this._moviesListContainer = moviesListContainer;
-    this._boardContainer = boardContainer;
     this._changeData = changeData;
-    this._body = body;
     this._changeMode = changeMode;
     this._mode = Mode.DEFAULT;
 
@@ -65,11 +63,12 @@ export default class Movie {
   }
 
   _showDetailedMovie() {
+    const detailedContainer = document.querySelector(`body`);
     this._changeMode();
     this._mode = Mode.DETAILED;
+    render(detailedContainer, this._movieDetailedComponent, RenderPosition.BEFOREEND);
     this._movieDetailedComponent.updateElement();
     this._setDetailedHandlers();
-    render(this._body, this._movieDetailedComponent, RenderPosition.BEFOREEND);
   }
 
   _escKeyDownHandler(evt) {

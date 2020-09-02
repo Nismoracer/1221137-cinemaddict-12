@@ -15,12 +15,11 @@ const userInfo = filters.filter((filter) => filter.name === `watched`).map((filt
 const siteHeader = document.querySelector(`header`);
 const siteMain = document.querySelector(`main`);
 const footer = document.querySelector(`footer`);
-const body = document.querySelector(`body`);
 
 render(siteHeader, new UserView(userInfo), RenderPosition.BEFOREEND);
 render(siteMain, new FilterView(filters), RenderPosition.BEFOREEND);
 
-const boardPresenter = new BoardPresenter(siteMain, body);
+const boardPresenter = new BoardPresenter(siteMain);
 boardPresenter.init(movies);
 
 render(footer, new FooterStatisticsView(movies.length), RenderPosition.BEFOREEND);
