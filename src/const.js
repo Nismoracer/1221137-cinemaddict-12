@@ -58,10 +58,10 @@ export const NAMES = [
 ];
 
 export const EMOJES = [
-  `angry.png`,
-  `puke.png`,
-  `sleeping.png`,
-  `smile.png`,
+  `angry`,
+  `puke`,
+  `sleeping`,
+  `smile`,
 ];
 
 export const COUNTRIES = [

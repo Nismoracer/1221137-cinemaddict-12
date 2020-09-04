@@ -10,10 +10,10 @@ const MAIN_MOVIES = 20;
 
 const movies = new Array(MAIN_MOVIES).fill().map(generateMovie);
 const filters = generateFilter(movies);
-const userInfo = filters.filter((filter) => filter.name === `history`).map((filter) => filter.count);
+const userInfo = filters.filter((filter) => filter.name === `watched`).map((filter) => filter.count);
 
-const siteHeader = document.querySelector(`.header`);
-const siteMain = document.querySelector(`.main`);
+const siteHeader = document.querySelector(`header`);
+const siteMain = document.querySelector(`main`);
 const footer = document.querySelector(`footer`);
 
 render(siteHeader, new UserView(userInfo), RenderPosition.BEFOREEND);
