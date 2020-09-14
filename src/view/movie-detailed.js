@@ -1,6 +1,8 @@
 import {humanizeDuration, humanizeReleaseDate, humanizeCommentDate} from "../utils/movie.js";
-import {createElement} from "../utils/render.js";
+import {render, RenderPosition, createElement} from "../utils/render.js";
+import {UserAction} from "../const.js";
 import Smart from "./smart.js";
+import he from "he";
 
 const filePathEmojes = `./images/emoji/`;
 
@@ -36,11 +38,11 @@ const createCommentsString = (comments) => {
         <img src="${getEmojiIcon(comment.emotion)}" width="55" height="55" alt="emoji-smile">
       </span>
       <div>
-        <p class="film-details__comment-text">${comment.comment}</p>
+        <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${comment.author}</span>
           <span class="film-details__comment-day">${humanizeCommentDate(comment.date)}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <button class="film-details__comment-delete" data-id="${comment.id}">Delete</button>
         </p>
       </div>
     </li>`;
@@ -48,11 +50,11 @@ const createCommentsString = (comments) => {
   return commentsString;
 };
 
-const createFilmDetailsTemplate = (movie) => {
-  const {poster, title, rating, createDate, duration, genres, description, comments, altTitle,
-    director, writers, actors, country, restriction, userDetails} = movie;
-  const runTime = humanizeDuration(duration);
-  const releaseDate = humanizeReleaseDate(createDate);
+const createFilmDetailsTemplate = (movie, comments) => {
+  const {title, alternativeTitle, totalRating, poster, ageRating, runTime,
+    genre, director, writers, actors, description, release} = movie.filmInfo;
+  const duration = humanizeDuration(runTime);
+  const releaseDate = humanizeReleaseDate(release.date);
   return (
     `<section class="film-details">
       <form class="film-details__inner" action="" method="get">
@@ -64,18 +66,18 @@ const createFilmDetailsTemplate = (movie) => {
             <div class="film-details__poster">
               <img class="film-details__poster-img" src="${poster}" alt="">
 
-              <p class="film-details__age">${restriction}+</p>
+              <p class="film-details__age">${ageRating}+</p>
             </div>
 
             <div class="film-details__info">
               <div class="film-details__info-head">
                 <div class="film-details__title-wrap">
                   <h3 class="film-details__title">${title}</h3>
-                  <p class="film-details__title-original">Original: ${altTitle}</p>
+                  <p class="film-details__title-original">Original: ${alternativeTitle}</p>
                 </div>
 
                 <div class="film-details__rating">
-                  <p class="film-details__total-rating">${rating}</p>
+                  <p class="film-details__total-rating">${totalRating}</p>
                 </div>
               </div>
 
@@ -86,11 +88,11 @@ const createFilmDetailsTemplate = (movie) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Writers</td>
-                  <td class="film-details__cell">${writers}</td>
+                  <td class="film-details__cell">${writers.join(`, `)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Actors</td>
-                  <td class="film-details__cell">${actors}</td>
+                  <td class="film-details__cell">${actors.join(`, `)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
@@ -98,14 +100,14 @@ const createFilmDetailsTemplate = (movie) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${runTime}</td>
+                  <td class="film-details__cell">${duration}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Country</td>
-                  <td class="film-details__cell">${country}</td>
+                  <td class="film-details__cell">${release.releaseCountry}</td>
                 </tr>
                 <tr class="film-details__row">
-                    ${createGenresString(genres)}
+                    ${createGenresString(genre)}
                 </tr>
               </table>
 
@@ -116,13 +118,13 @@ const createFilmDetailsTemplate = (movie) => {
           </div>
 
           <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${userDetails.watchlist ? `checked` : ``}>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${movie.userDetails.watchlist ? `checked` : ``}>
             <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched"  ${userDetails.alreadyWatched ? `checked` : ``}>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched"  ${movie.userDetails.alreadyWatched ? `checked` : ``}>
             <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite"  ${userDetails.favorite ? `checked` : ``}>
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite"  ${movie.userDetails.favorite ? `checked` : ``}>
             <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
         </div>
@@ -172,15 +174,58 @@ const createFilmDetailsTemplate = (movie) => {
 };
 
 export default class MovieDetailed extends Smart {
-  constructor(movie) {
+  constructor() {
     super();
-    this._movie = movie;
-    this._data = Object.assign({}, movie);
-    this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
-    this._watchedClickHandler = this._watchedClickHandler.bind(this);
-    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._closeDetailedHandler = this._closeDetailedHandler.bind(this);
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
+    this._handleDeleteComment = this._handleDeleteComment.bind(this);
+
+  }
+
+  init(movie, comments) {
+    this._movie = movie;
+    this._comments = comments;
+    this._emoji = ``;
+    const detailedContainer = document.querySelector(`body`);
+    render(detailedContainer, this, RenderPosition.BEFOREEND);
+  }
+
+  _checkButtonsStates() {
+    const watchlistState = this.getElement().querySelector(`#watchlist`).checked;
+    const favoriteState = this.getElement().querySelector(`#favorite`).checked;
+    const watchedState = this.getElement().querySelector(`#watched`).checked;
+    return {
+      watchlistState,
+      favoriteState,
+      watchedState};
+  }
+
+  _handleFormSubmit(callback) {
+    const textArea = this.getElement().querySelector(`.film-details__comment-input`);
+    if (textArea.value === `` || this._emoji === ``) {
+      return;
+    }
+    callback(UserAction.ADD_ELEMENT, {
+      id: null,
+      emotion: this._emoji,
+      author: null,
+      comment: textArea.value,
+      date: new Date()
+    });
+  }
+
+  _handleDeleteComment(evt) {
+    evt.preventDefault();
+    if (evt.target.tagName !== `BUTTON`) {
+      return;
+    }
+    const index = this._comments.findIndex((comment) => comment.id.toString() === evt.target.dataset.id);
+    this._callback._deleteComment(UserAction.DELETE_ELEMENT, this._comments[index]);
+  }
+
+  _setDeleteCommentHandler(callback) {
+    this._callback._deleteComment = callback;
+    this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
   }
 
   _closeDetailedHandler(evt) {
@@ -191,36 +236,6 @@ export default class MovieDetailed extends Smart {
   setCloseDetailedHandler(callback) {
     this._callback.closeClick = callback;
     this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
-  }
-
-  _watchlistClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchlistClick();
-  }
-
-  _watchedClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchedClick();
-  }
-
-  _favoriteClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.favoritesClick();
-  }
-
-  setWatchlistClickHandler(callback) {
-    this._callback.watchlistClick = callback;
-    this.getElement().querySelector(`#watchlist`).addEventListener(`change`, this._watchlistClickHandler);
-  }
-
-  setWatchedClickHandler(callback) {
-    this._callback.watchedClick = callback;
-    this.getElement().querySelector(`#watched`).addEventListener(`change`, this._watchedClickHandler);
-  }
-
-  setFavoritesClickHandler(callback) {
-    this._callback.favoritesClick = callback;
-    this.getElement().querySelector(`#favorite`).addEventListener(`change`, this._favoriteClickHandler);
   }
 
   _changeEmojiLogo(smile) {
@@ -235,24 +250,28 @@ export default class MovieDetailed extends Smart {
     switch (evt.target.id) {
       case `emoji-smile`:
         this._changeEmojiLogo(`smile`);
+        this._emoji = `smile`;
         break;
       case `emoji-sleeping`:
         this._changeEmojiLogo(`sleeping`);
+        this._emoji = `sleeping`;
         break;
       case `emoji-puke`:
         this._changeEmojiLogo(`puke`);
+        this._emoji = `puke`;
         break;
       case `emoji-angry`:
         this._changeEmojiLogo(`angry`);
+        this._emoji = `angry`;
         break;
     }
   }
 
-  setEmojiChangeHandler() {
+  _setEmojiChangeHandler() {
     this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, this._emojiChangeHandler);
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._movie);
+    return createFilmDetailsTemplate(this._movie, this._comments);
   }
 }

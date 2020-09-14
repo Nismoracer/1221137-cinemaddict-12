@@ -9,19 +9,22 @@ const generateDate = () => {
   return new Date(createDate);
 };
 
+
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
 export const generateComments = () => {
-  const MAX_COMMENTS = 5;
+  const comments = [];
   const MAX_STRINGS = 3;
-  const sumComments = [];
-  for (let i = 0; i < getRandomInteger(0, MAX_COMMENTS); i++) {
+  for (let i = 0; i < 5; i++) {
     let randomEmojiIndex = getRandomInteger(0, EMOJES.length - 1);
     const comment = {
+      id: `$` + generateId() + `$`,
       emotion: EMOJES[randomEmojiIndex],
       author: generateName(),
       comment: generateRandomArray(TEST_STRINGS, MAX_STRINGS).join(` `),
       date: generateDate(),
     };
-    sumComments.push(comment);
+    comments.push(comment);
   }
-  return sumComments;
+  return comments;
 };
