@@ -1,5 +1,5 @@
 import MovieView from "../view/movie.js";
-import MovieDetailedView from "../view/movie-detailed.js";
+import Popup from "./popup.js";
 import {render, RenderPosition, remove, replace} from "../utils/render.js";
 import {UpdateType} from "../const.js";
 
@@ -21,10 +21,9 @@ export default class Movie {
     this._handleWatchlistClick = this._handleWatchlistClick.bind(this);
     this._handleWatchedClick = this._handleWatchedClick.bind(this);
     this._handleFavoritesClick = this._handleFavoritesClick.bind(this);
+    this._setViewDefault = this._setViewDefault.bind(this);
 
     this._handleDetailedOpenClick = this._handleDetailedOpenClick.bind(this);
-    this._handleDetailedCloseClick = this._handleDetailedCloseClick.bind(this);
-    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
   init(movie) {
@@ -33,6 +32,7 @@ export default class Movie {
     const prevMovieComponent = this._movieComponent;
 
     this._movieComponent = new MovieView(movie);
+    this._movieDetailedPresenter = new Popup(this._setViewDefault, this._changeData);
 
     this._movieComponent.setWatchlistClickHandler(this._handleWatchlistClick);
     this._movieComponent.setWatchedClickHandler(this._handleWatchedClick);
@@ -52,7 +52,7 @@ export default class Movie {
 
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
-      this._hideDetailedMovie();
+      this._movieDetailedPresenter.hideDetailedMovie();
     }
   }
 
@@ -64,40 +64,17 @@ export default class Movie {
   }
 
   _showDetailedMovie() {
-    this._movieDetailedComponent = new MovieDetailedView(this._movie, this._changeData);
-    this._movieDetailedComponent.init(this);
     this._changeMode();
+    this._movieDetailedPresenter.init(this._movie);
     this._mode = Mode.DETAILED;
   }
 
-  _escKeyDownHandler(evt) {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
-      evt.preventDefault();
-      this._hideDetailedMovie();
-    }
-  }
-
-  _setDetailedHandlers() {
-    this._movieDetailedComponent._setDeleteCommentHandler();
-    this._movieDetailedComponent._setEmojiChangeHandler();
-    this._movieDetailedComponent.setCloseDetailedHandler(this._handleDetailedCloseClick);
-    document.addEventListener(`keydown`, this._escKeyDownHandler);
-  }
-
-  _hideDetailedMovie() {
-    document.removeEventListener(`keydown`, this._escKeyDownHandler);
-    this._movieDetailedComponent._checkButtonsStates();
-    this._movieDetailedComponent._commentsModel = null;
-    remove(this._movieDetailedComponent);
+  _setViewDefault() {
     this._mode = Mode.DEFAULT;
   }
 
   _handleDetailedOpenClick() {
     this._showDetailedMovie();
-  }
-
-  _handleDetailedCloseClick() {
-    this._hideDetailedMovie();
   }
 
   _handleWatchlistClick() {

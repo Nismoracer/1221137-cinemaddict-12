@@ -1,9 +1,8 @@
 import {humanizeDuration, humanizeReleaseDate, humanizeCommentDate} from "../utils/movie.js";
 import {render, RenderPosition, createElement} from "../utils/render.js";
 import {UserAction} from "../const.js";
-import {UpdateType} from "../const.js";
-import CommentModel from "../model/comments.js";
 import Smart from "./smart.js";
+import he from "he";
 
 const filePathEmojes = `./images/emoji/`;
 
@@ -39,7 +38,7 @@ const createCommentsString = (comments) => {
         <img src="${getEmojiIcon(comment.emotion)}" width="55" height="55" alt="emoji-smile">
       </span>
       <div>
-        <p class="film-details__comment-text">${comment.comment}</p>
+        <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${comment.author}</span>
           <span class="film-details__comment-day">${humanizeCommentDate(comment.date)}</span>
@@ -175,46 +174,44 @@ const createFilmDetailsTemplate = (movie, comments) => {
 };
 
 export default class MovieDetailed extends Smart {
-  constructor(movie, changeData) {
+  constructor() {
     super();
-    this._movie = movie;
-    this._changeData = changeData;
-    const detailedContainer = document.querySelector(`body`);
-
     this._closeDetailedHandler = this._closeDetailedHandler.bind(this);
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
-    this._handleViewAction = this._handleViewAction.bind(this);
-    this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleDeleteComment = this._handleDeleteComment.bind(this);
 
-    this._commentsModel = new CommentModel();
-    this._commentsModel.setComments(this._movie.commentsDetailed);
-    this._comments = this._commentsModel.getComments();
+  }
+
+  init(movie, comments) {
+    this._movie = movie;
+    this._comments = comments;
+    this._emoji = ``;
+    const detailedContainer = document.querySelector(`body`);
     render(detailedContainer, this, RenderPosition.BEFOREEND);
-
-    this._commentsModel.addObserver(this._handleModelEvent);
   }
 
-  init(movieComponent) {
-    this._movieComponent = movieComponent;
-    this._movieComponent._setDetailedHandlers();
+  _checkButtonsStates() {
+    const watchlistState = this.getElement().querySelector(`#watchlist`).checked;
+    const favoriteState = this.getElement().querySelector(`#favorite`).checked;
+    const watchedState = this.getElement().querySelector(`#watched`).checked;
+    return {
+      watchlistState,
+      favoriteState,
+      watchedState};
   }
 
-  _handleViewAction(actionType, update) {
-    switch (actionType) {
-      case UserAction.ADD_ELEMENT:
-        this._commentsModel.addComment(update);
-        break;
-      case UserAction.DELETE_ELEMENT:
-        this._commentsModel.deleteComment(update);
-        break;
+  _handleFormSubmit(callback) {
+    const textArea = this.getElement().querySelector(`.film-details__comment-input`);
+    if (textArea.value === `` || this._emoji === ``) {
+      return;
     }
-  }
-
-  _handleModelEvent() {
-    this._comments = this._commentsModel.getComments();
-    this.updateElement();
-    this._movieComponent._setDetailedHandlers();
+    callback(UserAction.ADD_ELEMENT, {
+      id: null,
+      emotion: this._emoji,
+      author: null,
+      comment: textArea.value,
+      date: new Date()
+    });
   }
 
   _handleDeleteComment(evt) {
@@ -223,25 +220,11 @@ export default class MovieDetailed extends Smart {
       return;
     }
     const index = this._comments.findIndex((comment) => comment.id.toString() === evt.target.dataset.id);
-    this._handleViewAction(UserAction.DELETE_ELEMENT, this._comments[index]);
+    this._callback._deleteComment(UserAction.DELETE_ELEMENT, this._comments[index]);
   }
 
-  _checkButtonsStates() {
-    const watchlistState = this.getElement().querySelector(`#watchlist`).checked;
-    const favoriteState = this.getElement().querySelector(`#favorite`).checked;
-    const watchedState = this.getElement().querySelector(`#watched`).checked;
-    const userData = Object.assign(
-        {}, this._movie.userDetails, {watchlist: watchlistState,
-          favorite: favoriteState,
-          alreadyWatched: watchedState
-        });
-    this._changeData(
-        UpdateType.MINOR,
-        Object.assign({}, this._movie, {userDetails: userData})
-    );
-  }
-
-  _setDeleteCommentHandler() {
+  _setDeleteCommentHandler(callback) {
+    this._callback._deleteComment = callback;
     this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
   }
 
@@ -267,15 +250,19 @@ export default class MovieDetailed extends Smart {
     switch (evt.target.id) {
       case `emoji-smile`:
         this._changeEmojiLogo(`smile`);
+        this._emoji = `smile`;
         break;
       case `emoji-sleeping`:
         this._changeEmojiLogo(`sleeping`);
+        this._emoji = `sleeping`;
         break;
       case `emoji-puke`:
         this._changeEmojiLogo(`puke`);
+        this._emoji = `puke`;
         break;
       case `emoji-angry`:
         this._changeEmojiLogo(`angry`);
+        this._emoji = `angry`;
         break;
     }
   }

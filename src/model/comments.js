@@ -1,4 +1,5 @@
 import Observer from "../utils/observer.js";
+import {UserAction} from "../const.js";
 
 export default class Comments extends Observer {
   constructor() {
@@ -20,7 +21,7 @@ export default class Comments extends Observer {
       update,
     ];
 
-    this._notifyPopup();
+    this._notify(UserAction.ADD_ELEMENT, update);
   }
 
   deleteComment(update) {
@@ -34,7 +35,6 @@ export default class Comments extends Observer {
       ...this._comments.slice(0, index),
       ...this._comments.slice(index + 1)
     ];
-
-    this._notify();
+    this._notify(UserAction.DELETE_ELEMENT, update);
   }
 }
