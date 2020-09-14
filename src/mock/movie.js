@@ -35,32 +35,46 @@ const getUserInfo = () => {
 };
 
 export const generateMovie = () => {
-  const postersPath = `./images/posters/`;
+  const postersPath = `images/posters/`;
   const MAX_STRINGS = 3;
   const minDuration = 100;
   const maxDuration = 200;
   const minAge = 3;
   const maxAge = 18;
   const createDate = generateDate();
-  const duration = getRandomInteger(minDuration, maxDuration);
-  const title = generateTitle();
+  const titleMock = generateTitle();
+  const runTime = getRandomInteger(minDuration, maxDuration);
+  const commentsId = [];
+  const comments = generateComments();
+  comments.forEach((comment) => {
+    return commentsId.push(comment.id);
+  });
+
+  const release = {
+    date: createDate,
+    releaseCountry: generateRandomArray(COUNTRIES, MAX_STRINGS)[0].toString()
+  };
+
+  const filmInfo = {
+    title: titleMock,
+    alternativeTitle: titleMock,
+    totalRating: generateRating(),
+    poster: generateFilePath(postersPath, POSTERS),
+    ageRating: getRandomInteger(minAge, maxAge),
+    runTime,
+    genre: Array.from(new Set(generateRandomArray(GENRES, MAX_STRINGS))),
+    director: generateName(),
+    writers: Array.from(new Set(generateRandomArray(NAMES, MAX_STRINGS))),
+    actors: Array.from(new Set(generateRandomArray(NAMES, MAX_STRINGS))),
+    release,
+    description: generateRandomArray(TEST_STRINGS, MAX_STRINGS).join(` `),
+  };
 
   return {
     id: generateId(),
-    poster: generateFilePath(postersPath, POSTERS),
-    title,
-    rating: generateRating(),
-    createDate,
-    duration,
-    genres: Array.from(new Set(generateRandomArray(GENRES, MAX_STRINGS))),
-    description: generateRandomArray(TEST_STRINGS, MAX_STRINGS).join(` `),
-    comments: generateComments(),
-    altTitle: title,
-    director: generateName(),
-    writers: Array.from(new Set(generateRandomArray(NAMES, MAX_STRINGS))).join(`, `),
-    actors: Array.from(new Set(generateRandomArray(NAMES, MAX_STRINGS))).join(`, `),
-    country: Array.from(new Set(generateRandomArray(COUNTRIES, MAX_STRINGS))).join(`, `),
-    restriction: getRandomInteger(minAge, maxAge),
-    userDetails: getUserInfo()
+    comments: commentsId,
+    filmInfo,
+    userDetails: getUserInfo(),
+    commentsDetailed: comments
   };
 };

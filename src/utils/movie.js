@@ -25,9 +25,9 @@ export const getUserStatus = (numberWatched) => {
 };
 
 export const sortByDate = (a, b) => {
-  return b.createDate.getTime() - a.createDate.getTime();
+  return b.filmInfo.release.date.getTime() - a.filmInfo.release.date.getTime();
 };
 
 export const sortByRating = (a, b) => {
-  return parseInt((b.rating.replace(`.`, ``)), 10) - parseInt((a.rating.replace(`.`, ``)), 10);
+  return parseInt((b.filmInfo.totalRating.replace(`.`, ``)), 10) - parseInt((a.filmInfo.totalRating.replace(`.`, ``)), 10);
 };

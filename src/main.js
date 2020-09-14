@@ -1,25 +1,40 @@
 import {render, RenderPosition} from "./utils/render.js";
+import {filter} from "./utils/filter.js";
 import {generateMovie} from "./mock/movie.js";
-import {generateFilter} from "./mock/filter.js";
+import MoviesModel from "./model/movies.js";
+import FilterModel from "./model/filter.js";
 import BoardPresenter from "./presenter/board.js";
-import FilterView from "./view/menu.js";
+import FilterPresenter from "./presenter/filter.js";
 import UserView from "./view/user-level.js";
 import FooterStatisticsView from "./view/footer-statistics.js";
 
 const MAIN_MOVIES = 20;
 
 const movies = new Array(MAIN_MOVIES).fill().map(generateMovie);
-const filters = generateFilter(movies);
-const userInfo = filters.filter((filter) => filter.name === `watched`).map((filter) => filter.count);
 
 const siteHeader = document.querySelector(`header`);
 const siteMain = document.querySelector(`main`);
 const footer = document.querySelector(`footer`);
 
-render(siteHeader, new UserView(userInfo), RenderPosition.BEFOREEND);
-render(siteMain, new FilterView(filters), RenderPosition.BEFOREEND);
+const moviesModel = new MoviesModel();
+const filterModel = new FilterModel();
+moviesModel.setMovies(movies);
+let userInfo = filter[`history`](moviesModel.getMovies()).length;
 
-const boardPresenter = new BoardPresenter(siteMain);
-boardPresenter.init(movies);
+const userStatus = new UserView(userInfo);
 
-render(footer, new FooterStatisticsView(movies.length), RenderPosition.BEFOREEND);
+const updateUserStatus = () => {
+  userInfo = filter[`history`](moviesModel.getMovies()).length;
+  userStatus.updateValue(userInfo);
+  userStatus.updateElement();
+};
+
+render(siteHeader, userStatus, RenderPosition.BEFOREEND);
+
+const boardPresenter = new BoardPresenter(siteMain, moviesModel, filterModel, updateUserStatus);
+const filterPresenter = new FilterPresenter(siteMain, filterModel, moviesModel);
+
+filterPresenter.init();
+boardPresenter.init();
+
+render(footer, new FooterStatisticsView(moviesModel.getMovies().length), RenderPosition.BEFOREEND);

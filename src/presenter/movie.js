@@ -1,6 +1,7 @@
 import MovieView from "../view/movie.js";
 import MovieDetailedView from "../view/movie-detailed.js";
 import {render, RenderPosition, remove, replace} from "../utils/render.js";
+import {UpdateType} from "../const.js";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -32,9 +33,7 @@ export default class Movie {
     const prevMovieComponent = this._movieComponent;
 
     this._movieComponent = new MovieView(movie);
-    if (!this._movieDetailedComponent) {
-      this._movieDetailedComponent = new MovieDetailedView(movie);
-    }
+
     this._movieComponent.setWatchlistClickHandler(this._handleWatchlistClick);
     this._movieComponent.setWatchedClickHandler(this._handleWatchedClick);
     this._movieComponent.setFavoritesClickHandler(this._handleFavoritesClick);
@@ -59,16 +58,16 @@ export default class Movie {
 
   destroy() {
     remove(this._movieComponent);
-    remove(this._movieDetailedComponent);
+    if (this._movieDetailedComponent) {
+      remove(this._movieDetailedComponent);
+    }
   }
 
   _showDetailedMovie() {
-    const detailedContainer = document.querySelector(`body`);
+    this._movieDetailedComponent = new MovieDetailedView(this._movie, this._changeData);
+    this._movieDetailedComponent.init(this);
     this._changeMode();
     this._mode = Mode.DETAILED;
-    render(detailedContainer, this._movieDetailedComponent, RenderPosition.BEFOREEND);
-    this._movieDetailedComponent.updateElement();
-    this._setDetailedHandlers();
   }
 
   _escKeyDownHandler(evt) {
@@ -79,17 +78,17 @@ export default class Movie {
   }
 
   _setDetailedHandlers() {
-    this._movieDetailedComponent.setWatchlistClickHandler(this._handleWatchlistClick);
-    this._movieDetailedComponent.setWatchedClickHandler(this._handleWatchedClick);
-    this._movieDetailedComponent.setFavoritesClickHandler(this._handleFavoritesClick);
+    this._movieDetailedComponent._setDeleteCommentHandler();
+    this._movieDetailedComponent._setEmojiChangeHandler();
     this._movieDetailedComponent.setCloseDetailedHandler(this._handleDetailedCloseClick);
-    this._movieDetailedComponent.setEmojiChangeHandler();
     document.addEventListener(`keydown`, this._escKeyDownHandler);
   }
 
   _hideDetailedMovie() {
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
-    this._movieDetailedComponent.getElement().remove();
+    this._movieDetailedComponent._checkButtonsStates();
+    this._movieDetailedComponent._commentsModel = null;
+    remove(this._movieDetailedComponent);
     this._mode = Mode.DEFAULT;
   }
 
@@ -105,14 +104,17 @@ export default class Movie {
     const userData = Object.assign(
         {}, this._movie.userDetails, {watchlist: !this._movie.userDetails.watchlist});
     this._changeData(
+        UpdateType.MINOR,
         Object.assign({}, this._movie, {userDetails: userData})
     );
   }
 
   _handleWatchedClick() {
     const userData = Object.assign(
-        {}, this._movie.userDetails, {alreadyWatched: !this._movie.userDetails.alreadyWatched});
+        {}, this._movie.userDetails, {alreadyWatched: !this._movie.userDetails.alreadyWatched,
+          watchingDate: (this._movie.userDetails.watchingDate) ? null : new Date()});
     this._changeData(
+        UpdateType.MINOR,
         Object.assign({}, this._movie, {userDetails: userData})
     );
   }
@@ -121,6 +123,7 @@ export default class Movie {
     const userData = Object.assign(
         {}, this._movie.userDetails, {favorite: !this._movie.userDetails.favorite});
     this._changeData(
+        UpdateType.MINOR,
         Object.assign({}, this._movie, {userDetails: userData})
     );
   }

@@ -6,6 +6,25 @@ export const SortType = {
   BY_RATING: `by-rating`
 };
 
+export const UserAction = {
+  UPDATE_ELEMENT: `UPDATE_ELEMENT`,
+  ADD_ELEMENT: `ADD_ELEMENT`,
+  DELETE_ELEMENT: `DELETE_ELEMENT`
+};
+
+export const UpdateType = {
+  PATCH: `PATCH`,
+  MINOR: `MINOR`,
+  MAJOR: `MAJOR`
+};
+
+export const FilterType = {
+  ALL: `all`,
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`,
+};
+
 export const TITLES = [
   `Страх и ненависть в Лас-Вегасе`,
   `Зеленый слоник`,

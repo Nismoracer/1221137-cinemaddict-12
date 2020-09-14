@@ -1,5 +1,5 @@
 import {getUserStatus} from "../utils/movie.js";
-import AbstractView from "./abstract.js";
+import Smart from "./smart.js";
 
 const createUserLevelTemplate = (userInfo) => {
   return (
@@ -10,10 +10,14 @@ const createUserLevelTemplate = (userInfo) => {
   );
 };
 
-export default class User extends AbstractView {
+export default class User extends Smart {
   constructor(userInfo) {
     super();
     this._userInfo = userInfo;
+  }
+
+  updateValue(watchedMovies) {
+    this._userInfo = watchedMovies;
   }
 
   getTemplate() {
