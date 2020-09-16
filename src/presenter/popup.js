@@ -1,9 +1,13 @@
 import MovieDetailedView from "../view/movie-detailed.js";
 import CommentModel from "../model/comments.js";
+import CommentsView from "../view/comments.js";
 import {UserAction, UpdateType} from "../const.js";
+import {render, remove, RenderPosition} from "../utils/render.js";
 
 export default class Popup {
-  constructor(setViewDefault, changeData) {
+  constructor(movie, setViewDefault, changeData, api) {
+    this._movie = movie;
+    this._api = api;
     this._changeData = changeData;
     this._setViewDefault = setViewDefault;
     this._commentsModel = new CommentModel();
@@ -15,27 +19,45 @@ export default class Popup {
 
     this._commentsModel.addObserver(this._handleModelEvent);
   }
-  init(movie) {
-    this._movie = movie;
+
+  init() {
     this._isCtrlPressed = false;
-    this._commentsModel.setComments(this._movie.commentsDetailed);
-    const comments = this._commentsModel.getComments();
-
     this._movieDetailedComponent = new MovieDetailedView();
-    this._movieDetailedComponent.init(this._movie, comments);
-    this._setDetailedHandlers();
-  }
-
-  _setDetailedHandlers() {
-    this._movieDetailedComponent._setDeleteCommentHandler(this._handleViewAction);
-    this._movieDetailedComponent._setEmojiChangeHandler();
+    this._movieDetailedComponent.init(this._movie, this._comments, this._isCommentsActive);
     this._movieDetailedComponent.setCloseDetailedHandler(this.hideDetailedMovie);
     document.addEventListener(`keydown`, this._pressKeyDownHandler);
+  }
+
+  _renderComments() {
+    const commentsContainer = this._movieDetailedComponent.getElement().querySelector(`form`);
+    if (this._commentsComponent) {
+      remove(this._commentsComponent);
+    }
+    this._commentsComponent = new CommentsView(this._comments, this._isDeleting, this._isSubmitting);
+    render(commentsContainer, this._commentsComponent, RenderPosition.BEFOREEND);
+    this._commentsComponent._setDeleteCommentHandler(this._handleViewAction);
+    this._commentsComponent._setEmojiChangeHandler();
+  }
+
+  _getComments() {
+    this._isCommentsActive = false;
+    this._comments = [];
+
+    this._api.requestComments(this._movie.id)
+    .then((comments) => {
+      this._commentsModel.setComments(UpdateType.INIT, comments);
+    })
+    .catch(() => {
+      this._commentsModel.setComments(UpdateType.INIT, []);
+    });
   }
 
   hideDetailedMovie() {
     document.removeEventListener(`keydown`, this._pressKeyDownHandler);
     this._updateCheckedButtons();
+    if (this._commentsComponent) {
+      remove(this._commentsComponent);
+    }
     this._movieDetailedComponent.getElement().remove();
     this._setViewDefault();
   }
@@ -65,40 +87,77 @@ export default class Popup {
     }
     if (evt.key === `Control` || evt.key === `Meta`) {
       this._isCtrlPressed = true;
-    } else if (evt.key === `Enter` && this._isCtrlPressed) {
-      this._movieDetailedComponent._handleFormSubmit(this._handleViewAction);
+    } else if (evt.key === `Enter` && this._isCtrlPressed && this._commentsComponent && !this._isSubmitting) {
+      this._commentsComponent._handleFormSubmit(this._handleViewAction);
       this._isCtrlPressed = false;
     }
+  }
+
+  _setCommentsState(comment) {
+    this._isDeleting = comment.id;
+    this._isSubmitting = true;
+    this._renderComments();
   }
 
   _handleViewAction(actionType, update) {
     switch (actionType) {
       case UserAction.ADD_ELEMENT:
-        this._commentsModel.addComment(update);
+        this._setCommentsState(update);
+        this._api.addComment(this._movie, update)
+        .then((response) => {
+          const newComment = CommentModel.adaptToClient(response.comments[response.comments.length - 1]);
+          this._changeData(
+              UpdateType.PATCH,
+              Object.assign({}, this._movie, {comments: response.movie.comments})
+          );
+          this._commentsModel.addComment(newComment);
+          this.hideDetailedMovie();
+        })
+        .catch(() => {
+          this._isSubmitting = null;
+          this._movieDetailedComponent.shake();
+          this._renderComments();
+        });
         break;
       case UserAction.DELETE_ELEMENT:
-        this._commentsModel.deleteComment(update);
+        this._setCommentsState(update);
+        this._api.deleteComment(update)
+        .then(() => {
+          this._commentsModel.deleteComment(update);
+        })
+        .catch(() => {
+          this._isDeleting = null;
+          this._movieDetailedComponent.shake();
+          this._renderComments();
+        });
         break;
     }
   }
 
-  _handleModelEvent(actionType, update) {
-    switch (actionType) {
-      case UserAction.ADD_ELEMENT:
-        this._movieDetailedComponent._comments = this._commentsModel.getComments();
-        this._movieDetailedComponent.updateElement();
-        this._setDetailedHandlers();
-        break;
-      case UserAction.DELETE_ELEMENT:
+  _handleModelEvent(updateType, update) {
+
+    switch (updateType) {
+      case UpdateType.PATCH:
         const deletedComment = Object.values(update)[0];
         const updatedComments = this._movie.comments.slice().filter((id) => id !== deletedComment);
         this._changeData(
             UpdateType.PATCH,
             Object.assign({}, this._movie, {comments: updatedComments})
         );
-        this._movieDetailedComponent._comments = this._commentsModel.getComments();
-        this._movieDetailedComponent.updateElement();
-        this._setDetailedHandlers();
+        this._comments = this._commentsModel.getComments();
+        this._isDeleting = null;
+        this._isSubmitting = null;
+        this._renderComments();
+        break;
+
+      case UpdateType.INIT:
+        this._comments = this._commentsModel.getComments();
+        if (this._movie.comments.length === this._comments.length) {
+          this._isCommentsActive = true;
+          this._isDeleting = null;
+          this._isSubmitting = null;
+          this._renderComments();
+        }
         break;
     }
   }

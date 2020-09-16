@@ -1,10 +1,8 @@
-import {humanizeDuration, humanizeReleaseDate, humanizeCommentDate} from "../utils/movie.js";
-import {render, RenderPosition, createElement} from "../utils/render.js";
-import {UserAction} from "../const.js";
+import {humanizeDuration, humanizeReleaseDate} from "../utils/movie.js";
+import {render, RenderPosition} from "../utils/render.js";
 import Smart from "./smart.js";
-import he from "he";
 
-const filePathEmojes = `./images/emoji/`;
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 const createGenresString = (genres) => {
   let sumString = genres.length > 1 ?
@@ -17,40 +15,8 @@ const createGenresString = (genres) => {
   sumString += `</td>`;
   return sumString;
 };
-const getEmojiIcon = (inputString = `smile`) => {
-  return filePathEmojes + inputString + `.png`;
-};
 
-const getEmojiTemplate = (smile) => {
-  return (
-    `<div for="add-emoji" class="film-details__add-emoji-label">
-      <img src="${getEmojiIcon(smile)}" width="55" height="55" alt="emoji-smile">
-    </div>`
-  );
-};
-
-const createCommentsString = (comments) => {
-  let commentsString = ``;
-  for (const comment of comments) {
-    commentsString +=
-    `<li class="film-details__comment">
-      <span class="film-details__comment-emoji">
-        <img src="${getEmojiIcon(comment.emotion)}" width="55" height="55" alt="emoji-smile">
-      </span>
-      <div>
-        <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
-        <p class="film-details__comment-info">
-          <span class="film-details__comment-author">${comment.author}</span>
-          <span class="film-details__comment-day">${humanizeCommentDate(comment.date)}</span>
-          <button class="film-details__comment-delete" data-id="${comment.id}">Delete</button>
-        </p>
-      </div>
-    </li>`;
-  }
-  return commentsString;
-};
-
-const createFilmDetailsTemplate = (movie, comments) => {
+const createFilmDetailsTemplate = (movie) => {
   const {title, alternativeTitle, totalRating, poster, ageRating, runTime,
     genre, director, writers, actors, description, release} = movie.filmInfo;
   const duration = humanizeDuration(runTime);
@@ -128,46 +94,6 @@ const createFilmDetailsTemplate = (movie, comments) => {
             <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
         </div>
-
-        <div class="form-details__bottom-container">
-          <section class="film-details__comments-wrap">
-            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
-
-            <ul class="film-details__comments-list">
-              ${createCommentsString(comments)}
-            </ul>
-
-            <div class="film-details__new-comment">
-              <div for="add-emoji" class="film-details__add-emoji-label"></div>
-
-              <label class="film-details__comment-label">
-                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
-              </label>
-
-              <div class="film-details__emoji-list">
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
-                <label class="film-details__emoji-label" for="emoji-smile">
-                  <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
-                <label class="film-details__emoji-label" for="emoji-sleeping">
-                  <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
-                <label class="film-details__emoji-label" for="emoji-puke">
-                  <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
-                <label class="film-details__emoji-label" for="emoji-angry">
-                  <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
-                </label>
-              </div>
-            </div>
-          </section>
-        </div>
       </form>
     </section>`
   );
@@ -177,15 +103,10 @@ export default class MovieDetailed extends Smart {
   constructor() {
     super();
     this._closeDetailedHandler = this._closeDetailedHandler.bind(this);
-    this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
-    this._handleDeleteComment = this._handleDeleteComment.bind(this);
-
   }
 
-  init(movie, comments) {
+  init(movie) {
     this._movie = movie;
-    this._comments = comments;
-    this._emoji = ``;
     const detailedContainer = document.querySelector(`body`);
     render(detailedContainer, this, RenderPosition.BEFOREEND);
   }
@@ -200,34 +121,6 @@ export default class MovieDetailed extends Smart {
       watchedState};
   }
 
-  _handleFormSubmit(callback) {
-    const textArea = this.getElement().querySelector(`.film-details__comment-input`);
-    if (textArea.value === `` || this._emoji === ``) {
-      return;
-    }
-    callback(UserAction.ADD_ELEMENT, {
-      id: null,
-      emotion: this._emoji,
-      author: null,
-      comment: textArea.value,
-      date: new Date()
-    });
-  }
-
-  _handleDeleteComment(evt) {
-    evt.preventDefault();
-    if (evt.target.tagName !== `BUTTON`) {
-      return;
-    }
-    const index = this._comments.findIndex((comment) => comment.id.toString() === evt.target.dataset.id);
-    this._callback._deleteComment(UserAction.DELETE_ELEMENT, this._comments[index]);
-  }
-
-  _setDeleteCommentHandler(callback) {
-    this._callback._deleteComment = callback;
-    this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
-  }
-
   _closeDetailedHandler(evt) {
     evt.preventDefault();
     this._callback.closeClick();
@@ -238,40 +131,14 @@ export default class MovieDetailed extends Smart {
     this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
   }
 
-  _changeEmojiLogo(smile) {
-    const currentElement = this.getElement().querySelector(`.film-details__add-emoji-label`);
-    const parentElement = currentElement.parentElement;
-    const newElement = createElement(getEmojiTemplate(smile));
-    parentElement.replaceChild(newElement, currentElement);
-  }
-
-  _emojiChangeHandler(evt) {
-    evt.preventDefault();
-    switch (evt.target.id) {
-      case `emoji-smile`:
-        this._changeEmojiLogo(`smile`);
-        this._emoji = `smile`;
-        break;
-      case `emoji-sleeping`:
-        this._changeEmojiLogo(`sleeping`);
-        this._emoji = `sleeping`;
-        break;
-      case `emoji-puke`:
-        this._changeEmojiLogo(`puke`);
-        this._emoji = `puke`;
-        break;
-      case `emoji-angry`:
-        this._changeEmojiLogo(`angry`);
-        this._emoji = `angry`;
-        break;
-    }
-  }
-
-  _setEmojiChangeHandler() {
-    this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, this._emojiChangeHandler);
+  shake() {
+    this.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      this.getElement().style.animation = ``;
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._movie, this._comments);
+    return createFilmDetailsTemplate(this._movie);
   }
 }
