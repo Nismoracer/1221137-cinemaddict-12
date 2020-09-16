@@ -9,7 +9,7 @@ import UserView from "./view/user-level.js";
 import FooterStatisticsView from "./view/footer-statistics.js";
 import Api from "./api.js";
 
-const AUTHORIZATION = `Basic MUh34dfSlosh2Ped`;
+const AUTHORIZATION = `Basic MUh34dfSlosh2Pez`;
 const END_POINT = `https://12.ecmascript.pages.academy/cinemaddict`;
 
 const siteHeader = document.querySelector(`header`);

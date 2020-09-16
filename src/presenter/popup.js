@@ -33,7 +33,7 @@ export default class Popup {
     if (this._commentsComponent) {
       remove(this._commentsComponent);
     }
-    this._commentsComponent = new CommentsView(this._comments, this._isDeleting, this._isSubmitting);
+    this._commentsComponent = new CommentsView(this._comments, this._isDeleting);
     render(commentsContainer, this._commentsComponent, RenderPosition.BEFOREEND);
     this._commentsComponent._setDeleteCommentHandler(this._handleViewAction);
     this._commentsComponent._setEmojiChangeHandler();
@@ -95,14 +95,13 @@ export default class Popup {
 
   _setCommentsState(comment) {
     this._isDeleting = comment.id;
-    this._isSubmitting = true;
     this._renderComments();
   }
 
   _handleViewAction(actionType, update) {
     switch (actionType) {
       case UserAction.ADD_ELEMENT:
-        this._setCommentsState(update);
+        this._commentsComponent.lockForm(true);
         this._api.addComment(this._movie, update)
         .then((response) => {
           const newComment = CommentModel.adaptToClient(response.comments[response.comments.length - 1]);
@@ -114,9 +113,8 @@ export default class Popup {
           this.hideDetailedMovie();
         })
         .catch(() => {
-          this._isSubmitting = null;
           this._movieDetailedComponent.shake();
-          this._renderComments();
+          this._commentsComponent.lockForm(false);
         });
         break;
       case UserAction.DELETE_ELEMENT:
@@ -146,7 +144,6 @@ export default class Popup {
         );
         this._comments = this._commentsModel.getComments();
         this._isDeleting = null;
-        this._isSubmitting = null;
         this._renderComments();
         break;
 
@@ -155,7 +152,6 @@ export default class Popup {
         if (this._movie.comments.length === this._comments.length) {
           this._isCommentsActive = true;
           this._isDeleting = null;
-          this._isSubmitting = null;
           this._renderComments();
         }
         break;

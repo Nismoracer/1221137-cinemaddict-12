@@ -41,7 +41,7 @@ const createCommentsString = (comments, isDeleting) => {
   return commentsString;
 };
 
-const createCommentsTemplate = (comments, isDeleting, isSubmitting) => {
+const createCommentsTemplate = (comments, isDeleting) => {
   return (
     `<div class="form-details__bottom-container">
       <section class="film-details__comments-wrap">
@@ -53,27 +53,26 @@ const createCommentsTemplate = (comments, isDeleting, isSubmitting) => {
           <div for="add-emoji" class="film-details__add-emoji-label"></div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"
-             ${isSubmitting ? `disabled` : ``}></textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
           </label>
 
           <div class="film-details__emoji-list">
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile" ${isSubmitting ? `disabled` : ``}>
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
             <label class="film-details__emoji-label" for="emoji-smile">
               <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping" ${isSubmitting ? `disabled` : ``}>
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
             <label class="film-details__emoji-label" for="emoji-sleeping">
               <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke" ${isSubmitting ? `disabled` : ``}>
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
             <label class="film-details__emoji-label" for="emoji-puke">
               <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry" ${isSubmitting ? `disabled` : ``}>
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
             <label class="film-details__emoji-label" for="emoji-angry">
               <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
             </label>
@@ -85,12 +84,11 @@ const createCommentsTemplate = (comments, isDeleting, isSubmitting) => {
 };
 
 export default class Comments extends Smart {
-  constructor(comments, isDeleting, isSubmitting) {
+  constructor(comments, isDeleting) {
     super();
     this._comments = comments;
     this._emoji = ``;
     this._isDeleting = isDeleting;
-    this._isSubmitting = isSubmitting;
 
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
     this._handleDeleteComment = this._handleDeleteComment.bind(this);
@@ -158,7 +156,15 @@ export default class Comments extends Smart {
     this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
   }
 
+  lockForm(state) {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = state;
+    this.getElement().querySelector(`#emoji-smile`).disabled = state;
+    this.getElement().querySelector(`#emoji-sleeping`).disabled = state;
+    this.getElement().querySelector(`#emoji-puke`).disabled = state;
+    this.getElement().querySelector(`#emoji-angry`).disabled = state;
+  }
+
   getTemplate() {
-    return createCommentsTemplate(this._comments, this._isDeleting, this._isSubmitting);
+    return createCommentsTemplate(this._comments, this._isDeleting);
   }
 }
