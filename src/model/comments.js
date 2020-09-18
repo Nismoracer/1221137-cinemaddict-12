@@ -1,5 +1,5 @@
 import Observer from "../utils/observer.js";
-import {UserAction} from "../const.js";
+import {UpdateType} from "../const.js";
 
 export default class Comments extends Observer {
   constructor() {
@@ -7,8 +7,9 @@ export default class Comments extends Observer {
     this._comments = [];
   }
 
-  setComments(comments) {
+  setComments(updateType, comments) {
     this._comments = comments.slice();
+    this._notify(updateType);
   }
 
   getComments() {
@@ -20,8 +21,6 @@ export default class Comments extends Observer {
       ...this._comments,
       update,
     ];
-
-    this._notify(UserAction.ADD_ELEMENT, update);
   }
 
   deleteComment(update) {
@@ -35,6 +34,30 @@ export default class Comments extends Observer {
       ...this._comments.slice(0, index),
       ...this._comments.slice(index + 1)
     ];
-    this._notify(UserAction.DELETE_ELEMENT, update);
+    this._notify(UpdateType.PATCH, update);
+  }
+
+  static adaptToClient(comment) {
+    const adaptedComment = Object.assign(
+        {},
+        comment,
+        {
+          date: comment.date !== null ? new Date(comment.date) : comment.date
+        }
+    );
+    return adaptedComment;
+  }
+
+  static adaptToServer(comment) {
+    const adaptedComment = Object.assign(
+        {},
+        comment,
+        {
+          date: comment.date instanceof Date ? comment.date.toISOString() : null
+        }
+    );
+    delete adaptedComment.id;
+    delete adaptedComment.author;
+    return adaptedComment;
   }
 }

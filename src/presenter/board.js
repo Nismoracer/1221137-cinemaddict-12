@@ -4,6 +4,7 @@ import BoardView from "../view/board.js";
 import MoviesListView from "../view/movies-list.js";
 import EmptyListView from "../view/no-movies.js";
 import LoadMoreView from "../view/load-more.js";
+import LoadingView from "../view/loading.js";
 import MoviePresenter from "./movie.js";
 import {filter} from "../utils/filter.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
@@ -13,8 +14,9 @@ import {sortByDate, sortByRating} from "../utils/movie.js";
 const MOVIES_COUNT_PER_STEP = 5;
 
 export default class Board {
-  constructor(boardContainer, moviesModel, filterModel, updateUserStatus) {
+  constructor(boardContainer, moviesModel, filterModel, updateUserStatus, api) {
     this._moviesModel = moviesModel;
+    this._api = api;
     this._updateUserStatus = updateUserStatus;
     this._boardContainer = boardContainer;
     this._filterModel = filterModel;
@@ -24,11 +26,13 @@ export default class Board {
 
     this._sortComponent = null;
     this._loadMoreComponent = null;
+    this._isLoading = true;
 
     this._boardWrapperComponent = new BoardWrapperView();
     this._boardComponent = new BoardView();
     this._moviesListComponent = new MoviesListView();
     this._emptyListComponent = new EmptyListView();
+    this._loadingComponent = new LoadingView();
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
@@ -78,7 +82,9 @@ export default class Board {
   }
 
   _handleViewAction(updateType, update) {
-    this._moviesModel.updateMovie(updateType, update);
+    this._api.updateMovie(update).then((response) => {
+      this._moviesModel.updateMovie(updateType, response);
+    });
   }
 
   _handleModelEvent(updateType, data) {
@@ -96,6 +102,12 @@ export default class Board {
         this._clearBoard({resetRenderedMoviesCount: true, resetSortType: true});
         this._renderBoard();
         break;
+      case UpdateType.INIT:
+        this._isLoading = false;
+        remove(this._loadingComponent);
+        this._updateUserStatus();
+        this._renderBoard();
+        break;
     }
   }
 
@@ -106,13 +118,17 @@ export default class Board {
   }
 
   _renderMovie(movie) {
-    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange);
+    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange, this._api);
     MoviePresent.init(movie);
     this._moviePresentersMap[movie.id] = MoviePresent;
   }
 
   _renderMovies(movies) {
     movies.forEach((movie) => this._renderMovie(movie));
+  }
+
+  _renderLoading() {
+    render(this._boardComponent, this._loadingComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderNoMovies() {
@@ -153,6 +169,7 @@ export default class Board {
     remove(this._sortComponent);
     remove(this._emptyListComponent);
     remove(this._loadMoreComponent);
+    remove(this._loadingComponent);
 
     if (resetRenderedMoviesCount) {
       this._renderedMovies = MOVIES_COUNT_PER_STEP;
@@ -166,6 +183,11 @@ export default class Board {
   }
 
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     const movies = this._getMovies();
     const moviesCount = movies.length;
 

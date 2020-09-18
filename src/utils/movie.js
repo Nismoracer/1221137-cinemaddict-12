@@ -10,7 +10,7 @@ export const humanizeReleaseDate = (createDate) => {
 };
 
 export const humanizeCommentDate = (commentDate) => {
-  return moment(commentDate).startOf(`hour`).fromNow();
+  return moment(commentDate).startOf(`minute`).fromNow();
 };
 
 export const getUserStatus = (numberWatched) => {

@@ -9,10 +9,11 @@ const Mode = {
 };
 
 export default class Movie {
-  constructor(moviesListContainer, changeData, changeMode) {
+  constructor(moviesListContainer, changeData, changeMode, api) {
     this._moviesListContainer = moviesListContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
+    this._api = api;
     this._mode = Mode.DEFAULT;
 
     this._movieComponent = null;
@@ -28,11 +29,10 @@ export default class Movie {
 
   init(movie) {
     this._movie = movie;
-
     const prevMovieComponent = this._movieComponent;
 
     this._movieComponent = new MovieView(movie);
-    this._movieDetailedPresenter = new Popup(this._setViewDefault, this._changeData);
+    this._movieDetailedPresenter = new Popup(this._movie, this._setViewDefault, this._changeData, this._api);
 
     this._movieComponent.setWatchlistClickHandler(this._handleWatchlistClick);
     this._movieComponent.setWatchedClickHandler(this._handleWatchedClick);
@@ -65,7 +65,8 @@ export default class Movie {
 
   _showDetailedMovie() {
     this._changeMode();
-    this._movieDetailedPresenter.init(this._movie);
+    this._movieDetailedPresenter._getComments();
+    this._movieDetailedPresenter.init();
     this._mode = Mode.DETAILED;
   }
 
