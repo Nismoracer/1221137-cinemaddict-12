@@ -4,6 +4,14 @@ export const SortType = {
   BY_RATING: `by-rating`
 };
 
+export const StatisticPeriod = {
+  ALL: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
 export const UserAction = {
   UPDATE_ELEMENT: `UPDATE_ELEMENT`,
   ADD_ELEMENT: `ADD_ELEMENT`,

@@ -2,6 +2,7 @@ import SmartView from "./smart.js";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {filter} from "../utils/filter.js";
+import {FilterType, StatisticPeriod} from "../const.js";
 
 const BAR_HEIGHT = 40;
 
@@ -68,30 +69,31 @@ const renderBarsChart = (statisticCtx, chartData) => {
 
 const createStatisticsTemplate = (userData, currentPeriod) => {
   const {movies, hours, chartGenres} = userData;
+  const rank = chartGenres[0] + `lover`;
   return (
     `<section class="statistic">
         <p class="statistic__rank">
           Your rank
           <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-          <span class="statistic__rank-label">${chartGenres.length === 0 ? `` : chartGenres[0] + `lover`}</span>
+          <span class="statistic__rank-label">${chartGenres.length === 0 ? `` : rank}</span>
         </p>
 
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" ${currentPeriod === `all-time` ? `checked` : ``}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" ${currentPeriod === StatisticPeriod.ALL ? `checked` : ``}>
           <label for="statistic-all-time" class="statistic__filters-label">All time</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today" ${currentPeriod === `today` ? `checked` : ``}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today" ${currentPeriod === StatisticPeriod.TODAY ? `checked` : ``}>
           <label for="statistic-today" class="statistic__filters-label">Today</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week" ${currentPeriod === `week` ? `checked` : ``}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week" ${currentPeriod === StatisticPeriod.WEEK ? `checked` : ``}>
           <label for="statistic-week" class="statistic__filters-label">Week</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month" ${currentPeriod === `month` ? `checked` : ``}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month" ${currentPeriod === StatisticPeriod.MONTH ? `checked` : ``}>
           <label for="statistic-month" class="statistic__filters-label">Month</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year" ${currentPeriod === `year` ? `checked` : ``}>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year" ${currentPeriod === StatisticPeriod.YEAR ? `checked` : ``}>
           <label for="statistic-year" class="statistic__filters-label">Year</label>
         </form>
 
@@ -122,10 +124,10 @@ export default class Statistics extends SmartView {
   constructor(movies) {
     super();
     this._movies = movies;
-    this._currentPeriod = `all-time`;
+    this._currentPeriod = StatisticPeriod.ALL;
     this._handlePeriodChange = this._handlePeriodChange.bind(this);
 
-    this._getStatistics(filter[`history`](this._movies));
+    this._getStatistics(filter[FilterType.HISTORY](this._movies));
     this._restoreHandlers();
   }
 
@@ -160,20 +162,20 @@ export default class Statistics extends SmartView {
 
   _handlePeriodChange(evt) {
     evt.preventDefault();
-    const watchedMovies = filter[`history`](this._movies);
+    const watchedMovies = filter[FilterType.HISTORY](this._movies);
     let filteredMovies = watchedMovies.slice();
     this._currentPeriod = evt.target.value;
     switch (evt.target.value) {
-      case `today`:
+      case StatisticPeriod.TODAY:
         filteredMovies = watchedMovies.filter((movie) => this._filterDates(1, movie));
         break;
-      case `week`:
+      case StatisticPeriod.WEEK:
         filteredMovies = watchedMovies.filter((movie) => this._filterDates(7, movie));
         break;
-      case `month`:
+      case StatisticPeriod.MONTH:
         filteredMovies = watchedMovies.filter((movie) => this._filterDates(31, movie));
         break;
-      case `year`:
+      case StatisticPeriod.YEAR:
         filteredMovies = watchedMovies.filter((movie) => this._filterDates(365, movie));
         break;
     }
