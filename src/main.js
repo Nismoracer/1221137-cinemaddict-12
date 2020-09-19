@@ -12,7 +12,7 @@ import StatisticsView from "./view/statistics.js";
 import FooterStatisticsView from "./view/footer-statistics.js";
 import Api from "./api.js";
 
-const AUTHORIZATION = `Basic MUh34dfSlosh2Pez`;
+const AUTHORIZATION = `Basic MUh34dfSlzsh2Pez`;
 const END_POINT = `https://12.ecmascript.pages.academy/cinemaddict`;
 
 const siteHeader = document.querySelector(`header`);
@@ -83,3 +83,12 @@ api.getMovies()
     menuComponent.setStatisticsClickHandler(handleMenuClick);
     render(footer, new FooterStatisticsView(moviesModel.getMovies().length), RenderPosition.BEFOREEND);
   });
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`)
+    .then(() => {
+      console.log(`ServiceWorker available`); // eslint-disable-line
+    }).catch(() => {
+      console.error(`ServiceWorker isn't available`); // eslint-disable-line
+    });
+});
