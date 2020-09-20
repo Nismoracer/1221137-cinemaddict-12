@@ -43,7 +43,7 @@ const createFilmDetailsTemplate = (movie) => {
                 </div>
 
                 <div class="film-details__rating">
-                  <p class="film-details__total-rating">${totalRating}</p>
+                  <p class="film-details__total-rating">${totalRating.toString()}</p>
                 </div>
               </div>
 

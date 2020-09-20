@@ -3,19 +3,30 @@ import CommentModel from "../model/comments.js";
 import CommentsView from "../view/comments.js";
 import {UserAction, UpdateType} from "../const.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
+import Api, {END_POINT, AUTHORIZATION} from "../api/index.js";
+import Store from "../api/store.js";
+import Provider from "../api/provider.js";
+
+const STORE_PREFIX = `kinoman-localcomments`;
+const STORE_VER = `v1`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 export default class Popup {
-  constructor(movie, setViewDefault, changeData, api) {
+  constructor(movie, setViewDefault, changeData) {
     this._movie = movie;
-    this._api = api;
     this._changeData = changeData;
     this._setViewDefault = setViewDefault;
     this._commentsModel = new CommentModel();
+
+    this._api = new Api(END_POINT, AUTHORIZATION);
+    const store = new Store(STORE_NAME, window.localStorage);
+    this._apiWithProvider = new Provider(this._api, store, this._renderComments);
 
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._pressKeyDownHandler = this._pressKeyDownHandler.bind(this);
     this.hideDetailedMovie = this.hideDetailedMovie.bind(this);
+    this._renderComments = this._renderComments.bind(this);
 
     this._commentsModel.addObserver(this._handleModelEvent);
   }
@@ -26,6 +37,8 @@ export default class Popup {
     this._movieDetailedComponent.init(this._movie, this._comments, this._isCommentsActive);
     this._movieDetailedComponent.setCloseDetailedHandler(this.hideDetailedMovie);
     document.addEventListener(`keydown`, this._pressKeyDownHandler);
+    window.addEventListener(`online`, this._renderComments);
+    window.addEventListener(`offline`, this._renderComments);
   }
 
   _renderComments() {
@@ -33,8 +46,11 @@ export default class Popup {
     if (this._commentsComponent) {
       remove(this._commentsComponent);
     }
+
     this._commentsComponent = new CommentsView(this._comments, this._isDeleting);
     render(commentsContainer, this._commentsComponent, RenderPosition.BEFOREEND);
+    this._commentsComponent.lockForm(!Provider.isOnline());
+    this._commentsComponent.lockForDelete(!Provider.isOnline());
     this._commentsComponent._setDeleteCommentHandler(this._handleViewAction);
     this._commentsComponent._setEmojiChangeHandler();
   }
@@ -43,7 +59,7 @@ export default class Popup {
     this._isCommentsActive = false;
     this._comments = [];
 
-    this._api.requestComments(this._movie.id)
+    this._apiWithProvider.requestComments(this._movie.id)
     .then((comments) => {
       this._commentsModel.setComments(UpdateType.INIT, comments);
     })
@@ -60,6 +76,8 @@ export default class Popup {
     }
     this._movieDetailedComponent.getElement().remove();
     this._setViewDefault();
+    window.removeEventListener(`online`, this._renderComments);
+    window.removeEventListener(`offline`, this._renderComments);
   }
 
   _updateCheckedButtons() {

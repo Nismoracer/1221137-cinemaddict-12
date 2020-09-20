@@ -38,7 +38,7 @@ export default class Movies extends Observer {
           ageRating: movie.film_info.age_rating,
           alternativeTitle: movie.film_info.alternative_title,
           runTime: movie.film_info.runtime,
-          totalRating: movie.film_info.total_rating.toString(),
+          totalRating: movie.film_info.total_rating,
           release: adaptedRelease,
         });
     delete adaptedFilmInfo.age_rating;
@@ -72,18 +72,18 @@ export default class Movies extends Observer {
   static adaptToServer(movie) {
     const adaptedRelease = Object.assign(
         {}, movie.filmInfo.release, {
-          release_country: movie.filmInfo.release.releaseCountry,
-          date: movie.filmInfo.release.date instanceof Date ? movie.filmInfo.release.date.toISOString() : null
+          "release_country": movie.filmInfo.release.releaseCountry,
+          "date": movie.filmInfo.release.date instanceof Date ? movie.filmInfo.release.date.toISOString() : null
         });
     delete adaptedRelease.releaseCountry;
 
     const adaptedFilmInfo = Object.assign(
         {}, movie.filmInfo, {
-          age_rating: movie.filmInfo.ageRating,
-          alternative_title: movie.filmInfo.alternativeTitle,
-          runtime: movie.filmInfo.runTime,
-          total_rating: parseInt(movie.filmInfo.totalRating, 10),
-          release: adaptedRelease,
+          "age_rating": movie.filmInfo.ageRating,
+          "alternative_title": movie.filmInfo.alternativeTitle,
+          "runtime": movie.filmInfo.runTime,
+          "total_rating": movie.filmInfo.totalRating,
+          "release": adaptedRelease,
         });
     delete adaptedFilmInfo.ageRating;
     delete adaptedFilmInfo.alternativeTitle;
@@ -92,8 +92,8 @@ export default class Movies extends Observer {
 
     const adaptedUserDetails = Object.assign(
         {}, movie.userDetails, {
-          already_watched: movie.userDetails.alreadyWatched,
-          watching_date: movie.userDetails.watchingDate instanceof Date ? movie.userDetails.watchingDate.toISOString() : null
+          "already_watched": movie.userDetails.alreadyWatched,
+          "watching_date": movie.userDetails.watchingDate instanceof Date ? movie.userDetails.watchingDate.toISOString() : null
         });
     delete adaptedUserDetails.alreadyWatched;
     delete adaptedUserDetails.watchingDate;
@@ -102,9 +102,9 @@ export default class Movies extends Observer {
         {},
         movie,
         {
-          comments: movie.comments,
-          film_info: adaptedFilmInfo,
-          user_details: adaptedUserDetails
+          "comments": movie.comments,
+          "film_info": adaptedFilmInfo,
+          "user_details": adaptedUserDetails
         }
     );
 

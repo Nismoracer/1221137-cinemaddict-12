@@ -1,5 +1,4 @@
 import SortView from "../view/sort.js";
-import BoardWrapperView from "../view/board-wrapper";
 import BoardView from "../view/board.js";
 import MoviesListView from "../view/movies-list.js";
 import EmptyListView from "../view/no-movies.js";
@@ -28,7 +27,6 @@ export default class Board {
     this._loadMoreComponent = null;
     this._isLoading = true;
 
-    this._boardWrapperComponent = new BoardWrapperView();
     this._boardComponent = new BoardView();
     this._moviesListComponent = new MoviesListView();
     this._emptyListComponent = new EmptyListView();
@@ -38,15 +36,22 @@ export default class Board {
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this.updateContainer = this.updateContainer.bind(this);
 
     this._moviesModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    render(this._boardContainer, this._boardWrapperComponent, RenderPosition.BEFOREEND);
-    render(this._boardWrapperComponent, this._boardComponent, RenderPosition.BEFOREEND);
     this._renderBoard();
+  }
+
+  destroy() {
+    this._clearBoard({resetRenderedMoviesCount: true, resetSortType: true});
+  }
+
+  updateContainer(boardWrapperComponent) {
+    this._boardContainer = boardWrapperComponent;
   }
 
   _getMovies() {
@@ -68,7 +73,7 @@ export default class Board {
       return;
     }
     this._currentSortType = sortType;
-    this._clearBoard({resetRenderedMoviesCount: false});
+    this._clearBoard({resetRenderedMoviesCount: true});
     this._renderBoard();
   }
 
@@ -98,7 +103,6 @@ export default class Board {
         this._renderBoard();
         break;
       case UpdateType.MAJOR:
-        this._updateUserStatus();
         this._clearBoard({resetRenderedMoviesCount: true, resetSortType: true});
         this._renderBoard();
         break;
@@ -118,7 +122,7 @@ export default class Board {
   }
 
   _renderMovie(movie) {
-    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange, this._api);
+    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange);
     MoviePresent.init(movie);
     this._moviePresentersMap[movie.id] = MoviePresent;
   }
@@ -183,6 +187,8 @@ export default class Board {
   }
 
   _renderBoard() {
+    render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
+
     if (this._isLoading) {
       this._renderLoading();
       return;

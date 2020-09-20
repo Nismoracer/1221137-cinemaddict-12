@@ -4,11 +4,12 @@ import {filter} from "../utils/filter.js";
 import {FilterType, UpdateType} from "../const.js";
 
 export default class Filter {
-  constructor(filterContainer, filterModel, moviesModel) {
+  constructor(filterContainer, filterModel, moviesModel, removeStatistics) {
+    this._removeStatistics = removeStatistics;
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
     this._moviesModel = moviesModel;
-    this._currentFilter = null;
+    this.currentFilter = null;
 
     this._filterComponent = null;
 
@@ -20,18 +21,19 @@ export default class Filter {
   }
 
   init() {
-    this._currentFilter = this._filterModel.getFilter();
+    this.currentFilter = this._filterModel.getFilter();
 
     const filters = this._getFilters();
     const prevFilterComponent = this._filterComponent;
 
-    this._filterComponent = new FilterView(filters, this._currentFilter);
+    this._filterComponent = new FilterView(filters, this.currentFilter);
     this._filterComponent.setFilterTypeChangeHandler(this._handleFilterTypeChange);
 
     if (prevFilterComponent === null) {
-      render(this._filterContainer, this._filterComponent, RenderPosition.BEFOREEND);
+      render(this._filterContainer, this._filterComponent, RenderPosition.AFTERBEGIN);
       return;
     }
+
 
     replace(this._filterComponent, prevFilterComponent);
     remove(prevFilterComponent);
@@ -42,7 +44,8 @@ export default class Filter {
   }
 
   _handleFilterTypeChange(filterType) {
-    if (this._currentFilter === filterType) {
+    this._removeStatistics();
+    if (this.currentFilter === filterType) {
       return;
     }
     this._filterModel.setFilter(UpdateType.MAJOR, filterType);
