@@ -93,6 +93,8 @@ export default class Comments extends Smart {
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
     this._handleDeleteComment = this._handleDeleteComment.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
+    this.lockForm = this.lockForm.bind(this);
+    this.lockForDelete = this.lockForDelete.bind(this);
   }
 
   _changeEmojiLogo(smile) {
@@ -158,10 +160,17 @@ export default class Comments extends Smart {
 
   lockForm(state) {
     this.getElement().querySelector(`.film-details__comment-input`).disabled = state;
-    this.getElement().querySelector(`#emoji-smile`).disabled = state;
-    this.getElement().querySelector(`#emoji-sleeping`).disabled = state;
-    this.getElement().querySelector(`#emoji-puke`).disabled = state;
-    this.getElement().querySelector(`#emoji-angry`).disabled = state;
+    const emojes = this.getElement().querySelectorAll(`.film-details__emoji-item`);
+    emojes.forEach((emoji) => {
+      emoji.disabled = state;
+    });
+  }
+
+  lockForDelete(state) {
+    const buttons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    buttons.forEach((button) => {
+      button.disabled = state;
+    });
   }
 
   getTemplate() {

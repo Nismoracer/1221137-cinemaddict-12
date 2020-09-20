@@ -122,7 +122,7 @@ export default class Board {
   }
 
   _renderMovie(movie) {
-    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange, this._api);
+    const MoviePresent = new MoviePresenter(this._moviesListComponent, this._handleViewAction, this._handleModeChange);
     MoviePresent.init(movie);
     this._moviePresentersMap[movie.id] = MoviePresent;
   }

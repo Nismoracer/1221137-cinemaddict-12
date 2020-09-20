@@ -29,7 +29,7 @@ export const sortByDate = (a, b) => {
 };
 
 export const sortByRating = (a, b) => {
-  return parseInt((b.filmInfo.totalRating.replace(`.`, ``)), 10) - parseInt((a.filmInfo.totalRating.replace(`.`, ``)), 10);
+  return b.filmInfo.totalRating - a.filmInfo.totalRating;
 };
 
 export const getCurrentDate = () => {

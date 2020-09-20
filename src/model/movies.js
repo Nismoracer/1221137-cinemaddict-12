@@ -38,7 +38,7 @@ export default class Movies extends Observer {
           ageRating: movie.film_info.age_rating,
           alternativeTitle: movie.film_info.alternative_title,
           runTime: movie.film_info.runtime,
-          totalRating: movie.film_info.total_rating.toString(),
+          totalRating: movie.film_info.total_rating,
           release: adaptedRelease,
         });
     delete adaptedFilmInfo.age_rating;
@@ -82,7 +82,7 @@ export default class Movies extends Observer {
           "age_rating": movie.filmInfo.ageRating,
           "alternative_title": movie.filmInfo.alternativeTitle,
           "runtime": movie.filmInfo.runTime,
-          "total_rating": parseInt(movie.filmInfo.totalRating, 10),
+          "total_rating": movie.filmInfo.totalRating,
           "release": adaptedRelease,
         });
     delete adaptedFilmInfo.ageRating;

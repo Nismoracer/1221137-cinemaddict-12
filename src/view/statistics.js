@@ -4,7 +4,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {filter} from "../utils/filter.js";
 import {FilterType, StatisticPeriod} from "../const.js";
 
-const BAR_HEIGHT = 40;
+const BAR_HEIGHT = 50;
 
 const renderBarsChart = (statisticCtx, chartData) => {
   const {chartGenres, chartValues} = chartData;
