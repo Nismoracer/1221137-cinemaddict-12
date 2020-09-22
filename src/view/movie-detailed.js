@@ -10,7 +10,7 @@ const createGenresString = (genres) => {
     <td class="film-details__cell">` : `<td class="film-details__term">Genre</td>
     <td class="film-details__cell">`;
   for (const genre of genres) {
-    sumString += `<span class="film-details__genre">` + genre + `</span>`;
+    sumString += `<span class="film-details__genre">${genre}</span>`;
   }
   sumString += `</td>`;
   return sumString;
@@ -121,16 +121,6 @@ export default class MovieDetailed extends Smart {
       watchedState};
   }
 
-  _closeDetailedHandler(evt) {
-    evt.preventDefault();
-    this._callback.closeClick();
-  }
-
-  setCloseDetailedHandler(callback) {
-    this._callback.closeClick = callback;
-    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
-  }
-
   shake() {
     this.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
     setTimeout(() => {
@@ -140,5 +130,15 @@ export default class MovieDetailed extends Smart {
 
   getTemplate() {
     return createFilmDetailsTemplate(this._movie);
+  }
+
+  setCloseDetailedHandler(callback) {
+    this._callback.closeClick = callback;
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeDetailedHandler);
+  }
+
+  _closeDetailedHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeClick();
   }
 }

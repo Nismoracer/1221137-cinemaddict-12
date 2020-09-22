@@ -1,6 +1,6 @@
 import {remove, render, RenderPosition} from "./utils/render.js";
 import {filter} from "./utils/filter.js";
-import {UpdateType} from "./const.js";
+import {UpdateType, FilterType} from "./const.js";
 import MoviesModel from "./model/movies.js";
 import FilterModel from "./model/filter.js";
 import BoardPresenter from "./presenter/board.js";
@@ -10,7 +10,7 @@ import MenuView from "./view/menu.js";
 import BoardWrapperView from "./view/board-wrapper";
 import StatisticsView from "./view/statistics.js";
 import FooterStatisticsView from "./view/footer-statistics.js";
-import Api, {END_POINT, AUTHORIZATION} from "./api/index.js";
+import Api, {END_POINT, AUTHORIZATION} from "./api/api.js";
 import Store from "./api/store.js";
 import Provider from "./api/provider.js";
 
@@ -34,7 +34,7 @@ let boardWrapperComponent = new BoardWrapperView();
 let statisticsComponent = null;
 
 const updateUserStatus = () => {
-  const userInfo = filter[`history`](moviesModel.getMovies()).length;
+  const userInfo = filter[FilterType.HISTORY](moviesModel.getMovies()).length;
   userStatus.updateValue(userInfo);
   userStatus.updateElement();
 };
@@ -90,12 +90,7 @@ apiWithProvider.getMovies()
   });
 
 window.addEventListener(`load`, () => {
-  navigator.serviceWorker.register(`/sw.js`)
-    .then(() => {
-      console.log(`ServiceWorker available`); // eslint-disable-line
-    }).catch(() => {
-      console.error(`ServiceWorker isn't available`); // eslint-disable-line
-    });
+  navigator.serviceWorker.register(`/sw.js`);
 });
 
 window.addEventListener(`online`, () => {

@@ -154,32 +154,7 @@ export default class Statistics extends SmartView {
     const dateTo = new Date();
     const dateFrom = new Date(date.setDate(date.getDate() - days));
     dateFrom.setHours(0, 0, 0, 999);
-    if (inputMovie.userDetails.watchingDate > dateFrom && inputMovie.userDetails.watchingDate < dateTo) {
-      return true;
-    }
-    return false;
-  }
-
-  _handlePeriodChange(evt) {
-    evt.preventDefault();
-    const watchedMovies = filter[FilterType.HISTORY](this._movies);
-    let filteredMovies = watchedMovies.slice();
-    this._currentPeriod = evt.target.value;
-    switch (evt.target.value) {
-      case StatisticPeriod.TODAY:
-        filteredMovies = watchedMovies.filter((movie) => this._filterDates(1, movie));
-        break;
-      case StatisticPeriod.WEEK:
-        filteredMovies = watchedMovies.filter((movie) => this._filterDates(7, movie));
-        break;
-      case StatisticPeriod.MONTH:
-        filteredMovies = watchedMovies.filter((movie) => this._filterDates(31, movie));
-        break;
-      case StatisticPeriod.YEAR:
-        filteredMovies = watchedMovies.filter((movie) => this._filterDates(365, movie));
-        break;
-    }
-    this._getStatistics(filteredMovies);
+    return inputMovie.userDetails.watchingDate > dateFrom && inputMovie.userDetails.watchingDate < dateTo;
   }
 
   _getStatistics(movies) {
@@ -207,11 +182,33 @@ export default class Statistics extends SmartView {
     this._restoreHandlers();
   }
 
+  getTemplate() {
+    return createStatisticsTemplate(this._data, this._currentPeriod);
+  }
+
   setPeriodChangeHandler() {
     this.getElement().querySelector(`.statistic__filters`).addEventListener(`change`, this._handlePeriodChange);
   }
 
-  getTemplate() {
-    return createStatisticsTemplate(this._data, this._currentPeriod);
+  _handlePeriodChange(evt) {
+    evt.preventDefault();
+    const watchedMovies = filter[FilterType.HISTORY](this._movies);
+    let filteredMovies = watchedMovies.slice();
+    this._currentPeriod = evt.target.value;
+    switch (evt.target.value) {
+      case StatisticPeriod.TODAY:
+        filteredMovies = watchedMovies.filter((movie) => this._filterDates(1, movie));
+        break;
+      case StatisticPeriod.WEEK:
+        filteredMovies = watchedMovies.filter((movie) => this._filterDates(7, movie));
+        break;
+      case StatisticPeriod.MONTH:
+        filteredMovies = watchedMovies.filter((movie) => this._filterDates(31, movie));
+        break;
+      case StatisticPeriod.YEAR:
+        filteredMovies = watchedMovies.filter((movie) => this._filterDates(365, movie));
+        break;
+    }
+    this._getStatistics(filteredMovies);
   }
 }

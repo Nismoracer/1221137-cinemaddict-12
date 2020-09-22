@@ -1,8 +1,9 @@
 import moment from "moment";
 
 export const humanizeDuration = (duration) => {
-  const hours = duration / 60;
-  return Math.floor(hours) + `h ` + Math.floor(duration % 60) + `m`;
+  const minutes = 60;
+  const hours = duration / minutes;
+  return Math.floor(hours) + `h ` + Math.floor(duration % minutes) + `m`;
 };
 
 export const humanizeReleaseDate = (createDate) => {
@@ -14,11 +15,15 @@ export const humanizeCommentDate = (commentDate) => {
 };
 
 export const getUserStatus = (numberWatched) => {
-  if (numberWatched > 0 && numberWatched <= 10) {
+  const noviceFrom = 0;
+  const noviceTo = 10;
+  const fanTo = 20;
+  const expertFrom = 21;
+  if (numberWatched > noviceFrom && numberWatched <= noviceTo) {
     return `novice`;
-  } else if (numberWatched > 10 && numberWatched <= 20) {
+  } else if (numberWatched > noviceTo && numberWatched <= fanTo) {
     return `fan`;
-  } else if (numberWatched > 21) {
+  } else if (numberWatched > expertFrom) {
     return `movie buff`;
   }
   return ``;
@@ -30,9 +35,4 @@ export const sortByDate = (a, b) => {
 
 export const sortByRating = (a, b) => {
   return b.filmInfo.totalRating - a.filmInfo.totalRating;
-};
-
-export const getCurrentDate = () => {
-  const currentDate = new Date();
-  return currentDate.setHours(23, 59, 59, 999);
 };

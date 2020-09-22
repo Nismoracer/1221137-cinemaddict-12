@@ -12,6 +12,10 @@ export default class LoadMore extends AbstractView {
     this._loadMoreHandler = this._loadMoreHandler.bind(this);
   }
 
+  getTemplate() {
+    return createLoadMoreButton();
+  }
+
   _loadMoreHandler(evt) {
     evt.preventDefault();
     this._callback.loadMoreClick();
@@ -20,9 +24,5 @@ export default class LoadMore extends AbstractView {
   setLoadMoreHandler(callback) {
     this._callback.loadMoreClick = callback;
     this.getElement().addEventListener(`click`, this._loadMoreHandler);
-  }
-
-  getTemplate() {
-    return createLoadMoreButton();
   }
 }

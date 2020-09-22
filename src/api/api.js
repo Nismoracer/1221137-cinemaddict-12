@@ -1,6 +1,6 @@
 import MoviesModel from "../model/movies.js";
 import CommentsModel from "../model/comments.js";
-export const AUTHORIZATION = `Basic MUh34dfSlzsh2Pez`;
+export const AUTHORIZATION = `Basic MUd3KdfSlzsh2PeK`;
 export const END_POINT = `https://12.ecmascript.pages.academy/cinemaddict`;
 
 const Method = {

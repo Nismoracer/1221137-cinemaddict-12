@@ -34,21 +34,8 @@ export default class Filter {
       return;
     }
 
-
     replace(this._filterComponent, prevFilterComponent);
     remove(prevFilterComponent);
-  }
-
-  _handleModelEvent() {
-    this.init();
-  }
-
-  _handleFilterTypeChange(filterType) {
-    this._removeStatistics();
-    if (this.currentFilter === filterType) {
-      return;
-    }
-    this._filterModel.setFilter(UpdateType.MAJOR, filterType);
   }
 
   _getFilters() {
@@ -76,5 +63,17 @@ export default class Filter {
         count: filter[FilterType.FAVORITES](movies).length
       }
     ];
+  }
+
+  _handleModelEvent() {
+    this.init();
+  }
+
+  _handleFilterTypeChange(filterType) {
+    this._removeStatistics();
+    if (this.currentFilter === filterType) {
+      return;
+    }
+    this._filterModel.setFilter(UpdateType.MAJOR, filterType);
   }
 }

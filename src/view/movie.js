@@ -4,7 +4,7 @@ import AbstractView from "./abstract.js";
 const DESCRIPTION_LENGTH = 140;
 
 const cropDescription = (inputText) => {
-  if (inputText.length < 140) {
+  if (inputText.length < DESCRIPTION_LENGTH) {
     return inputText;
   }
   return inputText.slice(0, DESCRIPTION_LENGTH - 2) + `...`;
@@ -13,7 +13,7 @@ const cropDescription = (inputText) => {
 const createMovieTemplate = (movie) => {
   const {title, totalRating, poster, runTime, genre, release, description} = movie.filmInfo;
   const {watchlist, alreadyWatched, favorite} = movie.userDetails;
-  const hrsMins = humanizeDuration(runTime);
+  const duration = humanizeDuration(runTime);
   const year = release.date.getFullYear();
   return (
     `<article class="film-card">
@@ -21,7 +21,7 @@ const createMovieTemplate = (movie) => {
       <p class="film-card__rating">${totalRating.toString()}</p>
       <p class="film-card__info">
         <span class="film-card__year">${year}</span>
-        <span class="film-card__duration">${hrsMins}</span>
+        <span class="film-card__duration">${duration}</span>
         <span class="film-card__genre">${genre.length > 0 ? genre[0] : ``}</span>
       </p>
       <img src="./${poster}" alt="" class="film-card__poster">
@@ -46,6 +46,10 @@ export default class Movie extends AbstractView {
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
 
     this._openDetailedHandler = this._openDetailedHandler.bind(this);
+  }
+
+  getTemplate() {
+    return createMovieTemplate(this._movie);
   }
 
   _openDetailedHandler(evt) {
@@ -88,9 +92,5 @@ export default class Movie extends AbstractView {
     this.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, this._openDetailedHandler);
     this.getElement().querySelector(`.film-card__title`).addEventListener(`click`, this._openDetailedHandler);
     this.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, this._openDetailedHandler);
-  }
-
-  getTemplate() {
-    return createMovieTemplate(this._movie);
   }
 }

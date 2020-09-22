@@ -21,6 +21,7 @@ export default class Comments extends Observer {
       ...this._comments,
       update,
     ];
+    this._notify(UpdateType.PATCH, update);
   }
 
   deleteComment(update) {

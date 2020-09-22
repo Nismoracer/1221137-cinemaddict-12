@@ -89,7 +89,7 @@ export default class Movie {
   _handleWatchedClick() {
     const userData = Object.assign(
         {}, this._movie.userDetails, {alreadyWatched: !this._movie.userDetails.alreadyWatched,
-          watchingDate: (this._movie.userDetails.watchingDate) ? null : new Date()});
+          watchingDate: (this._movie.userDetails.alreadyWatched === true) ? null : new Date()});
     this._changeData(
         UpdateType.MINOR,
         Object.assign({}, this._movie, {userDetails: userData})

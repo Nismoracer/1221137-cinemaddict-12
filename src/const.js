@@ -26,15 +26,15 @@ export const UpdateType = {
 };
 
 export const FilterType = {
-  ALL: `all`,
-  WATCHLIST: `watchlist`,
-  HISTORY: `history`,
-  FAVORITES: `favorites`
+  ALL: `All`,
+  WATCHLIST: `Watchlist`,
+  HISTORY: `History`,
+  FAVORITES: `Favorites`
 };
 
-export const EMOJES = [
-  `angry`,
-  `puke`,
-  `sleeping`,
-  `smile`,
-];
+export const Emojes = {
+  ANGRY: `emoji-angry`,
+  PUKE: `emoji-puke`,
+  SLEEPING: `emoji-sleeping`,
+  SMILE: `emoji-smile`,
+};

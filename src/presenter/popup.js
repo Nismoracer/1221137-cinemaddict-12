@@ -3,7 +3,7 @@ import CommentModel from "../model/comments.js";
 import CommentsView from "../view/comments.js";
 import {UserAction, UpdateType} from "../const.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
-import Api, {END_POINT, AUTHORIZATION} from "../api/index.js";
+import Api, {END_POINT, AUTHORIZATION} from "../api/api.js";
 import Store from "../api/store.js";
 import Provider from "../api/provider.js";
 
@@ -87,15 +87,30 @@ export default class Popup {
       this._movie.userDetails.alreadyWatched === watchedState) {
       return;
     }
+    let newWatchingDate = this._movie.userDetails.watchingDate;
+    if (this._movie.userDetails.alreadyWatched !== watchedState) {
+      if (this._movie.userDetails.alreadyWatched) {
+        newWatchingDate = null;
+      } else {
+        newWatchingDate = new Date();
+      }
+    }
+
     const userData = Object.assign(
         {}, this._movie.userDetails, {watchlist: watchlistState,
           favorite: favoriteState,
-          alreadyWatched: watchedState
+          alreadyWatched: watchedState,
+          watchingDate: newWatchingDate
         });
     this._changeData(
         UpdateType.MINOR,
         Object.assign({}, this._movie, {userDetails: userData})
     );
+  }
+
+  _setCommentsState(comment) {
+    this._isDeleting = comment.id;
+    this._renderComments();
   }
 
   _pressKeyDownHandler(evt) {
@@ -105,15 +120,10 @@ export default class Popup {
     }
     if (evt.key === `Control` || evt.key === `Meta`) {
       this._isCtrlPressed = true;
-    } else if (evt.key === `Enter` && this._isCtrlPressed && this._commentsComponent && !this._isSubmitting) {
+    } else if (evt.key === `Enter` && this._isCtrlPressed && this._commentsComponent) {
       this._commentsComponent._handleFormSubmit(this._handleViewAction);
       this._isCtrlPressed = false;
     }
-  }
-
-  _setCommentsState(comment) {
-    this._isDeleting = comment.id;
-    this._renderComments();
   }
 
   _handleViewAction(actionType, update) {
@@ -128,7 +138,7 @@ export default class Popup {
               Object.assign({}, this._movie, {comments: response.movie.comments})
           );
           this._commentsModel.addComment(newComment);
-          this.hideDetailedMovie();
+          this._renderComments();
         })
         .catch(() => {
           this._movieDetailedComponent.shake();

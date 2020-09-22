@@ -1,13 +1,13 @@
 import {humanizeCommentDate} from "../utils/movie.js";
 import {createElement} from "../utils/render.js";
-import {UserAction} from "../const.js";
+import {UserAction, Emojes} from "../const.js";
 import Smart from "./smart.js";
 import he from "he";
 
-const filePathEmojes = `./images/emoji/`;
+const FILE_PATH_EMOJES = `./images/emoji/`;
 
 const getEmojiIcon = (inputString = `smile`) => {
-  return filePathEmojes + inputString + `.png`;
+  return FILE_PATH_EMOJES + inputString + `.png`;
 };
 
 const getEmojiTemplate = (smile) => {
@@ -104,22 +104,50 @@ export default class Comments extends Smart {
     parentElement.replaceChild(newElement, currentElement);
   }
 
+  lockForm(state) {
+    this.getElement().querySelector(`.film-details__comment-input`).disabled = state;
+    const emojes = this.getElement().querySelectorAll(`.film-details__emoji-item`);
+    emojes.forEach((emoji) => {
+      emoji.disabled = state;
+    });
+  }
+
+  lockForDelete(state) {
+    const buttons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    buttons.forEach((button) => {
+      button.disabled = state;
+    });
+  }
+
+  getTemplate() {
+    return createCommentsTemplate(this._comments, this._isDeleting);
+  }
+
+  _setEmojiChangeHandler() {
+    this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, this._emojiChangeHandler);
+  }
+
+  _setDeleteCommentHandler(callback) {
+    this._callback._deleteComment = callback;
+    this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
+  }
+
   _emojiChangeHandler(evt) {
     evt.preventDefault();
     switch (evt.target.id) {
-      case `emoji-smile`:
+      case Emojes.SMILE:
         this._changeEmojiLogo(`smile`);
         this._emoji = `smile`;
         break;
-      case `emoji-sleeping`:
+      case Emojes.SLEEPING:
         this._changeEmojiLogo(`sleeping`);
         this._emoji = `sleeping`;
         break;
-      case `emoji-puke`:
+      case Emojes.PUKE:
         this._changeEmojiLogo(`puke`);
         this._emoji = `puke`;
         break;
-      case `emoji-angry`:
+      case Emojes.ANGRY:
         this._changeEmojiLogo(`angry`);
         this._emoji = `angry`;
         break;
@@ -140,10 +168,6 @@ export default class Comments extends Smart {
     });
   }
 
-  _setEmojiChangeHandler() {
-    this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, this._emojiChangeHandler);
-  }
-
   _handleDeleteComment(evt) {
     evt.preventDefault();
     if (evt.target.tagName !== `BUTTON`) {
@@ -151,29 +175,5 @@ export default class Comments extends Smart {
     }
     const index = this._comments.findIndex((comment) => comment.id === evt.target.dataset.id);
     this._callback._deleteComment(UserAction.DELETE_ELEMENT, this._comments[index]);
-  }
-
-  _setDeleteCommentHandler(callback) {
-    this._callback._deleteComment = callback;
-    this.getElement().querySelector(`.film-details__comments-list`).addEventListener(`click`, this._handleDeleteComment);
-  }
-
-  lockForm(state) {
-    this.getElement().querySelector(`.film-details__comment-input`).disabled = state;
-    const emojes = this.getElement().querySelectorAll(`.film-details__emoji-item`);
-    emojes.forEach((emoji) => {
-      emoji.disabled = state;
-    });
-  }
-
-  lockForDelete(state) {
-    const buttons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
-    buttons.forEach((button) => {
-      button.disabled = state;
-    });
-  }
-
-  getTemplate() {
-    return createCommentsTemplate(this._comments, this._isDeleting);
   }
 }
