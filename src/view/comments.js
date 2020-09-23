@@ -1,6 +1,6 @@
 import {humanizeCommentDate} from "../utils/movie.js";
 import {createElement} from "../utils/render.js";
-import {UserAction, Emojes} from "../const.js";
+import {UserAction, Emoji, EmojiLogo} from "../const.js";
 import Smart from "./smart.js";
 import he from "he";
 
@@ -135,21 +135,21 @@ export default class Comments extends Smart {
   _emojiChangeHandler(evt) {
     evt.preventDefault();
     switch (evt.target.id) {
-      case Emojes.SMILE:
-        this._changeEmojiLogo(`smile`);
-        this._emoji = `smile`;
+      case Emoji.SMILE:
+        this._changeEmojiLogo(EmojiLogo.SMILE);
+        this._emoji = EmojiLogo.SMILE;
         break;
-      case Emojes.SLEEPING:
-        this._changeEmojiLogo(`sleeping`);
-        this._emoji = `sleeping`;
+      case Emoji.SLEEPING:
+        this._changeEmojiLogo(EmojiLogo.SLEEPING);
+        this._emoji = EmojiLogo.SLEEPING;
         break;
-      case Emojes.PUKE:
-        this._changeEmojiLogo(`puke`);
-        this._emoji = `puke`;
+      case Emoji.PUKE:
+        this._changeEmojiLogo(EmojiLogo.PUKE);
+        this._emoji = EmojiLogo.PUKE;
         break;
-      case Emojes.ANGRY:
-        this._changeEmojiLogo(`angry`);
-        this._emoji = `angry`;
+      case Emoji.ANGRY:
+        this._changeEmojiLogo(EmojiLogo.ANGRY);
+        this._emoji = EmojiLogo.ANGRY;
         break;
     }
   }

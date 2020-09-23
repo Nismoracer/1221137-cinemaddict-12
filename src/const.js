@@ -32,9 +32,30 @@ export const FilterType = {
   FAVORITES: `Favorites`
 };
 
-export const Emojes = {
+export const Emoji = {
   ANGRY: `emoji-angry`,
   PUKE: `emoji-puke`,
   SLEEPING: `emoji-sleeping`,
-  SMILE: `emoji-smile`,
+  SMILE: `emoji-smile`
 };
+
+export const EmojiLogo = {
+  ANGRY: `angry`,
+  PUKE: `puke`,
+  SLEEPING: `sleeping`,
+  SMILE: `smile`
+};
+
+export const UserStatus = {
+  NOVICE: `novice`,
+  FAN: `fan`,
+  MOVIE_BUFF: `sleeping`
+};
+
+export const UserStatistic = {
+  NOVICE_FROM: 0,
+  NOVICE_TO: 10,
+  FAN_TO: 20,
+  EXPERT_FROM: 21
+};
+

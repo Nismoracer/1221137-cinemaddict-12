@@ -1,4 +1,5 @@
 import moment from "moment";
+import {UserStatus, UserStatistic} from "../const.js";
 
 export const humanizeDuration = (duration) => {
   const minutes = 60;
@@ -15,16 +16,12 @@ export const humanizeCommentDate = (commentDate) => {
 };
 
 export const getUserStatus = (numberWatched) => {
-  const noviceFrom = 0;
-  const noviceTo = 10;
-  const fanTo = 20;
-  const expertFrom = 21;
-  if (numberWatched > noviceFrom && numberWatched <= noviceTo) {
-    return `novice`;
-  } else if (numberWatched > noviceTo && numberWatched <= fanTo) {
-    return `fan`;
-  } else if (numberWatched > expertFrom) {
-    return `movie buff`;
+  if (numberWatched > UserStatistic.NOVICE_FROM && numberWatched <= UserStatistic.NOVICE_TO) {
+    return UserStatus.NOVICE;
+  } else if (numberWatched > UserStatistic.NOVICE_TO && numberWatched <= UserStatistic.FAN_TO) {
+    return UserStatus.FAN;
+  } else if (numberWatched > UserStatistic.EXPERT_FROM) {
+    return UserStatus.MOVIE_BUFF;
   }
   return ``;
 };
